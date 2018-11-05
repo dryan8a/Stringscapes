@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using DylanMonoGameIntro;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;
@@ -19,25 +20,57 @@ namespace Stringscapes
         SpriteFont wordListFont;
         Texture2D letterTexture;
         GraphicsDevice GraphicsDevice;
+        Sprite backdrop; 
         string baseWord = "";
         public string chosenWord = "";
         Random gen = new Random();
+        public int wordsStartPos; 
+
+        Vector2[] newPositions;
+        bool animate = false;
+        float lerpCount = 0;
 
         public List<string> CorrectWords = new List<string>();
         public Vector2 LongestWordSize;
 
         public void Reshuffle()
         {
-            List<int> positions = new List<int>();
-            for (int i = 0; i < baseWord.Length; i++)
+            if (!animate)
             {
-                positions.Add(i);
+                List<int> positions = new List<int>();
+                for (int i = 0; i < baseWord.Length; i++)
+                {
+                    positions.Add(i);
+                }
+
+                for (int i = 0; i < baseWord.Length; i++)
+                {
+                    int num = gen.Next(0, positions.Count);
+                    
+                    newPositions[i] = baseCircle.innerPoints[positions[num]] - new Vector2(letterTexture.Width / 2, letterTexture.Height / 2);
+                    positions.RemoveAt(num);
+                }
+
+                animate = true;
             }
-            for (int i = 0; i < baseWord.Length; i++)
+        }
+
+        void ShuffleAnimation()
+        {
+            if (animate)
             {
-                int num = gen.Next(0, positions.Count);
-                letters[i].Position = baseCircle.innerPoints[positions[num]] - new Vector2(letterTexture.Width / 2, letterTexture.Height / 2);
-                positions.RemoveAt(num);
+                for (int i = 0; i < letters.Count; i++)
+                {
+                    letters[i].Position = Vector2.Lerp(letters[i].Position, newPositions[i], lerpCount);                                 
+                }
+
+                lerpCount += .06f;
+
+                if (lerpCount >= 1)
+                {
+                    lerpCount = 0;
+                    animate = false;
+                }
             }
         }
 
@@ -45,12 +78,17 @@ namespace Stringscapes
         {
             word = word.ToUpper();
             baseWord = word;
+            newPositions = new Vector2[baseWord.Length];
             this.letterFont = letterFont;
             this.wordListFont = wordListFont;
             baseCircle = new BaseCircle(baseCircleTexture, new Vector2(0, GraphicsDevice.Viewport.Height - baseCircleTexture.Height), new Color(Color.LightSteelBlue, 235), GraphicsDevice, letterTexture.Width / 2, word.Length);
             letters = new List<Letter>();
             this.letterTexture = letterTexture;
             this.GraphicsDevice = GraphicsDevice;
+            Texture2D backdropPixel = new Texture2D(GraphicsDevice, 1, 1);
+            backdropPixel.SetData(new [] { Color.White });
+            backdrop = new Sprite(backdropPixel, Vector2.Zero, Color.CornflowerBlue, GraphicsDevice);
+            backdrop.Scale = new Vector2(baseCircleTexture.Width, GraphicsDevice.Viewport.Height);
             for (int i = 0; i < word.Length; i++)
             {
                 letters.Add(new Letter(letterTexture, baseCircle.innerPoints[i] - new Vector2(letterTexture.Width / 2, letterTexture.Height / 2), Color.TransparentBlack, word[i], letterFont, GraphicsDevice, Color.OrangeRed));
@@ -58,7 +96,7 @@ namespace Stringscapes
             Reshuffle();
             currentWord = "";
             orderOfLetters = new List<int>();
-
+            wordsStartPos = 900;
             LongestWordSize = wordListFont.MeasureString("DDDDDDDD");
         }
 
@@ -68,6 +106,9 @@ namespace Stringscapes
             {
                 letters[i].Update(mouse);
             }
+
+            ShuffleAnimation();
+
             bool firstClickCheck = false;
             bool isNoneClicked = true;
             for (int i = 0; i < letters.Count; i++)
@@ -132,6 +173,24 @@ namespace Stringscapes
         }
         public void Draw(SpriteBatch spriteBatch)
         {
+            int rowsPerColumn = 19;
+            var startPos = new Vector2(wordsStartPos, 50);
+            var padding = new Vector2(10, 10);
+
+            for (int col = 0; col < CorrectWords.Count; col += rowsPerColumn)
+            {
+                for (int row = 0; row < rowsPerColumn; row++)
+                {
+                    var index = col + row;
+                    if (index >= CorrectWords.Count) { break; }
+
+                    var pos = startPos + new Vector2(col / rowsPerColumn * (LongestWordSize.X + padding.X), row * (LongestWordSize.Y + padding.Y));
+                    spriteBatch.DrawString(wordListFont, CorrectWords[index], pos, Color.Black);
+                }
+            }
+
+
+            backdrop.Draw(spriteBatch);
             baseCircle.Draw(spriteBatch);
 
             for (int i = 0; i < letters.Count; i++)
@@ -141,22 +200,6 @@ namespace Stringscapes
             for (int i = 0; i < letters.Count; i++)
             {
                 letters[i].Draw(spriteBatch);
-            }
-
-            int rowsPerColumn = 19;
-            var startPos = new Vector2(900, 50);
-            var padding = new Vector2(10, 10);
-
-            for (int col = 0; col < CorrectWords.Count; col += rowsPerColumn)
-            {
-                for (int row = 0; row < rowsPerColumn; row++)
-                {
-                    var index = col + row;
-                    if(index >= CorrectWords.Count) { break; }
-
-                    var pos = startPos + new Vector2(col / rowsPerColumn * (LongestWordSize.X + padding.X), row * (LongestWordSize.Y + padding.Y));
-                    spriteBatch.DrawString(wordListFont, CorrectWords[index], pos, Color.Black);
-                }
             }
 
             Vector2 sizeOfText = letterFont.MeasureString(currentWord);

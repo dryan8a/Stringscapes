@@ -20,8 +20,6 @@ namespace Stringscapes
 
         Dictionary<int, string> words = new Dictionary<int, string>();
 
-        //animate shuffle, from Stan
-        //
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
@@ -48,7 +46,8 @@ namespace Stringscapes
                     words.Add(index,word);
                     index++;
                 }
-            }
+            }            
+
             spriteBatch = new SpriteBatch(GraphicsDevice);            
             Texture2D baseCircleTexture = Content.Load<Texture2D>("nonBlurryCircleScaled");
             Texture2D letterTexture = Content.Load<Texture2D>("LetterCircle");
@@ -78,15 +77,24 @@ namespace Stringscapes
             {
                stringscape.Reshuffle();
             }
-           
+            
             stringscape.Update(mouse);
-            if(stringscape.chosenWord != "")
+            if(stringscape.chosenWord.Length > 2)
             {
                 if(words.ContainsValue(stringscape.chosenWord) && !stringscape.CorrectWords.Contains(stringscape.chosenWord))
                 {
                     stringscape.CorrectWords.Add(stringscape.chosenWord);
                 }
                 stringscape.chosenWord = "";
+            }
+            KeyboardState state = Keyboard.GetState();
+            if(state.IsKeyDown(Keys.Left))
+            {
+                stringscape.wordsStartPos -= 10;
+            }
+            else if(state.IsKeyDown(Keys.Right))
+            {
+                stringscape.wordsStartPos += 10;
             }
             previous = mouse;
             base.Update(gameTime);

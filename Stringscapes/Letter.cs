@@ -22,6 +22,7 @@ namespace Stringscapes
         private MouseState currentState;
         private GraphicsDevice device;
         public Vector2 connectingLetterPos;
+
         public Letter(Texture2D texture, Vector2 position, Color color, char letter, SpriteFont font, GraphicsDevice device,Color lineColor) : base(texture, position, color, device)
         {
             this.letter = letter;
@@ -44,11 +45,13 @@ namespace Stringscapes
             {
                 mouseHoveringOver = false;
             }
+
             if (state.LeftButton == ButtonState.Released)
             {
                 isClicked = false;
                 didPass = false;
             }
+
             if (!isClicked && !didPass)
             {
                 Color = Color.TransparentBlack;
@@ -58,6 +61,7 @@ namespace Stringscapes
             {
                 line.CalculateLine(Position + new Vector2(Radius, Radius),state.Position.ToVector2());
             }
+
             if(didPass)
             {
                 line.CalculateLine(Position + new Vector2(Radius, Radius),connectingLetterPos);
