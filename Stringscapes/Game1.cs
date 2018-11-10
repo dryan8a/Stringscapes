@@ -51,17 +51,18 @@ namespace Stringscapes
             spriteBatch = new SpriteBatch(GraphicsDevice);            
             Texture2D baseCircleTexture = Content.Load<Texture2D>("nonBlurryCircleScaled");
             Texture2D letterTexture = Content.Load<Texture2D>("LetterCircle");
+            Texture2D arrowTexture = Content.Load<Texture2D>("arrow");
             SpriteFont letterFont = Content.Load<SpriteFont>("font");
             string baseWord = "";
             while (baseWord == "")
             {
                 int wordIndex = gen.Next(0,words.Count);
-                if(words[wordIndex].Length >=6 && words[wordIndex].Length <=8)
+                if(words[wordIndex].Length >=7 && words[wordIndex].Length <=8)
                 {
                     baseWord = words[wordIndex];
                 }
             }
-            stringscape = new Stringscape(baseWord, baseCircleTexture, letterTexture, GraphicsDevice, letterFont,Content.Load<SpriteFont>("WordListFont"));
+            stringscape = new Stringscape(baseWord, baseCircleTexture, letterTexture,arrowTexture, GraphicsDevice, letterFont,Content.Load<SpriteFont>("WordListFont"));
             reshuffleButton = new Sprite(Content.Load<Texture2D>("cycle"), Vector2.Zero, Color.LightGray, GraphicsDevice);
             reshuffleButton.Scale = new Vector2(.25f);
         }

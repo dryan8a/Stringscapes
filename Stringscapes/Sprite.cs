@@ -24,7 +24,8 @@ namespace DylanMonoGameIntro
         public Vector2 Origin = Vector2.Zero;
         public BoundingBoxTypes DrawBounds = BoundingBoxTypes.None;
         public float Rotation = 0f;
-        public static Texture2D pixel;        
+        public static Texture2D pixel;
+        public SpriteEffects SpriteEffects = SpriteEffects.None;
 
         public virtual Rectangle Bounds
         {
@@ -64,12 +65,12 @@ namespace DylanMonoGameIntro
 
         public virtual void Draw(SpriteBatch spriteBatch)
         {
-            spriteBatch.Draw(Image, Position, null, Color, Rotation, Origin, Scale, SpriteEffects.None, 0);
+            spriteBatch.Draw(Image, Position, null, Color, Rotation, Origin, Scale, SpriteEffects, 0);
 
             switch(DrawBounds)
             {
                 case BoundingBoxTypes.Rectangle:
-                    spriteBatch.Draw(pixel, Position - Origin * Scale, null, Color.Red * 0.5f, 0f, Vector2.Zero, new Vector2(Image.Width, Image.Height) * Scale, SpriteEffects.None, 0f);            
+                    spriteBatch.Draw(pixel, Position - Origin * Scale, null, Color.Red * 0.5f, 0f, Vector2.Zero, new Vector2(Image.Width, Image.Height) * Scale, SpriteEffects, 0f);            
                     break;
 
                 case BoundingBoxTypes.Circle:
@@ -92,7 +93,7 @@ namespace DylanMonoGameIntro
                     }   
                     for (int i = 0; i < numberOfPoints+1; i++)
                     {
-                        spriteBatch.Draw(pixel, boundPoints[i], null, Color.Red * 0.5f, 0f, Vector2.Zero, 1f, SpriteEffects.None, 0f);
+                        spriteBatch.Draw(pixel, boundPoints[i], null, Color.Red * 0.5f, 0f, Vector2.Zero, 1f, SpriteEffects, 0f);
                     }
                         boundPoints[numberOfPoints] = boundPoints[0];
                     
