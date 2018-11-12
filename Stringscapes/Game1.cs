@@ -63,8 +63,10 @@ namespace Stringscapes
                 }
             }
             stringscape = new Stringscape(baseWord, baseCircleTexture, letterTexture,arrowTexture, GraphicsDevice, letterFont,Content.Load<SpriteFont>("WordListFont"));
-            reshuffleButton = new Sprite(Content.Load<Texture2D>("cycle"), Vector2.Zero, Color.LightGray, GraphicsDevice);
-            reshuffleButton.Scale = new Vector2(.25f);
+            reshuffleButton = new Sprite(Content.Load<Texture2D>("cycle"), Vector2.Zero, Color.LightGray, GraphicsDevice)
+            {
+                Scale = new Vector2(.25f)
+            };
         }
 
         protected override void Update(GameTime gameTime)
@@ -87,15 +89,6 @@ namespace Stringscapes
                     stringscape.CorrectWords.Add(stringscape.chosenWord);
                 }
                 stringscape.chosenWord = "";
-            }
-            KeyboardState state = Keyboard.GetState();
-            if(state.IsKeyDown(Keys.Left))
-            {
-                stringscape.wordsStartPos -= 10;
-            }
-            else if(state.IsKeyDown(Keys.Right))
-            {
-                stringscape.wordsStartPos += 10;
             }
             previous = mouse;
             base.Update(gameTime);

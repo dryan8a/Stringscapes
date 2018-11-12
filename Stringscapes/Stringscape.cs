@@ -17,7 +17,7 @@ namespace Stringscapes
         List<int> orderOfLetters;
         BaseCircle baseCircle;
         SpriteFont letterFont;
-        SpriteFont wordListFont;
+        readonly SpriteFont wordListFont;
         Texture2D letterTexture;
         GraphicsDevice GraphicsDevice;
         Sprite backdrop;
@@ -28,13 +28,17 @@ namespace Stringscapes
         Random gen = new Random();
         public int wordsStartPos;
         Rectangle MouseRect;
-        Vector2[] newPositions;
+        MouseState previousState;
+        readonly Vector2[] newPositions;
         bool animate = false;
         float lerpCount = 0;
+        float smoothStepCount = 0;
         int wordPage = 0;
         public List<string> CorrectWords = new List<string>();
         public Vector2 LongestWordSize;
-
+        Vector2 startPos;
+        Vector2 previousWordStartPos;
+        bool NextPageAnimate = false;
         public void Reshuffle()
         {
             if (!animate)
@@ -75,7 +79,21 @@ namespace Stringscapes
                 }
             }
         }
+        void NextPageAnimation()
+        {
+            if(NextPageAnimate)
+            {
+                startPos = Vector2.Lerp(startPos, previousWordStartPos, smoothStepCount);
+                
+                smoothStepCount += 0.0001f;
 
+                if (smoothStepCount >=1)
+                {
+                    smoothStepCount = 0;
+                    NextPageAnimate = false;
+                }
+            }
+        }
         public Stringscape(string word, Texture2D baseCircleTexture, Texture2D letterTexture, Texture2D arrowTexture, GraphicsDevice GraphicsDevice, SpriteFont letterFont, SpriteFont wordListFont)
         {
             word = word.ToUpper();
@@ -89,8 +107,10 @@ namespace Stringscapes
             this.GraphicsDevice = GraphicsDevice;
             Texture2D backdropPixel = new Texture2D(GraphicsDevice, 1, 1);
             backdropPixel.SetData(new [] { Color.White });
-            backdrop = new Sprite(backdropPixel, Vector2.Zero, Color.CornflowerBlue, GraphicsDevice);
-            backdrop.Scale = new Vector2(baseCircleTexture.Width, GraphicsDevice.Viewport.Height);
+            backdrop = new Sprite(backdropPixel, Vector2.Zero, Color.CornflowerBlue, GraphicsDevice)
+            {
+                Scale = new Vector2(baseCircleTexture.Width, GraphicsDevice.Viewport.Height)
+            };
             for (int i = 0; i < word.Length; i++)
             {
                 letters.Add(new Letter(letterTexture, baseCircle.innerPoints[i] - new Vector2(letterTexture.Width / 2, letterTexture.Height / 2), Color.TransparentBlack, word[i], letterFont, GraphicsDevice, Color.OrangeRed));
@@ -98,11 +118,13 @@ namespace Stringscapes
             Reshuffle();
             currentWord = "";
             orderOfLetters = new List<int>();
-            wordsStartPos = 900;
+            wordsStartPos = 850;
             LongestWordSize = wordListFont.MeasureString("DDDDDDDD");
             leftArrow = new Sprite(arrowTexture, new Vector2(900, 600), Color.White, GraphicsDevice);
-            rightArrow = new Sprite(arrowTexture, new Vector2(GraphicsDevice.Viewport.Width - arrowTexture.Width - 50, 600), Color.White, GraphicsDevice);
-            rightArrow.SpriteEffects = SpriteEffects.FlipHorizontally;
+            rightArrow = new Sprite(arrowTexture, new Vector2(GraphicsDevice.Viewport.Width - arrowTexture.Width - 50, 600), Color.White, GraphicsDevice)
+            {
+                SpriteEffects = SpriteEffects.FlipHorizontally
+            };
         }
 
         public void Update(MouseState mouse)
@@ -177,22 +199,28 @@ namespace Stringscapes
                 }
             }
             
-            if(leftArrow.Bounds.Intersects(MouseRect) && mouse.LeftButton == ButtonState.Pressed && wordPage != 0)
+            if(leftArrow.Bounds.Intersects(MouseRect) && mouse.LeftButton == ButtonState.Pressed && wordPage != 0 && previousState.LeftButton == ButtonState.Released)
             {
                 wordPage--;
             }
-            else if(rightArrow.Bounds.Intersects(MouseRect) && mouse.LeftButton == ButtonState.Pressed)
+            else if(rightArrow.Bounds.Intersects(MouseRect) && mouse.LeftButton == ButtonState.Pressed && previousState.LeftButton == ButtonState.Released)
             {
                 wordPage++;
             }
+            previousState = mouse;
         }
         public void Draw(SpriteBatch spriteBatch)
         {
-            int wordPageSize = GraphicsDevice.Viewport.Width - wordsStartPos;
-            int rowsPerColumn = 6;
-            var startPos = new Vector2(wordsStartPos + wordPageSize*wordPage, 50);
             var padding = new Vector2(10, 10);
-
+            var wordPageSize = GraphicsDevice.Viewport.Width - wordsStartPos;
+            var rowsPerColumn = 6;
+            previousWordStartPos = startPos;
+            startPos = new Vector2(wordsStartPos - (2*padding.X + wordPageSize)*wordPage, 50);
+            if(previousWordStartPos != startPos)
+            {
+                NextPageAnimate = true;
+            }
+            NextPageAnimation();
             for (int col = 0; col < CorrectWords.Count; col += rowsPerColumn)
             {
                 for (int row = 0; row < rowsPerColumn; row++)
