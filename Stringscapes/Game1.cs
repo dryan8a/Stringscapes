@@ -24,6 +24,8 @@ namespace Stringscapes
         {
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
+
+            IsFixedTimeStep = true;
         }
 
         protected override void Initialize()
@@ -34,6 +36,10 @@ namespace Stringscapes
             graphics.ApplyChanges();
             base.Initialize();
         }
+
+        int drawCounter = 0;
+        int updateCounter = 0;
+
         protected override void LoadContent()
         {
             
@@ -71,6 +77,13 @@ namespace Stringscapes
 
         protected override void Update(GameTime gameTime)
         {
+            updateCounter++;
+
+            if(gameTime.IsRunningSlowly)
+            {
+                ;
+            }
+
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
             
@@ -96,6 +109,19 @@ namespace Stringscapes
         
         protected override void Draw(GameTime gameTime)
         {
+            drawCounter++;
+
+            if(updateCounter != drawCounter)
+            {
+                ;
+            }
+
+
+            if (gameTime.IsRunningSlowly)
+            {
+                ;
+            }
+
             GraphicsDevice.Clear(Color.CornflowerBlue);
             spriteBatch.Begin();
             stringscape.Draw(spriteBatch);
