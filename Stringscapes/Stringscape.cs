@@ -7,6 +7,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Net;
+using System.Net.Http;
+using Newtonsoft.Json;
 
 namespace Stringscapes
 {
@@ -42,8 +45,25 @@ namespace Stringscapes
         bool animateNextPage = false;
         Vector2 padding = new Vector2(10, 10);
         int wordPageSize = 0;
+        HttpClient client;
 
+        public async Task<string> GetDef(string word)
+        {
 
+            HttpWebRequest req;
+            
+
+            string pull = await client.GetStringAsync($"https://od-api.oxforddictionaries.com:443/api/v1/entries/en/{word.ToLower()}");
+            object definition = JsonConvert.DeserializeObject(pull);
+            //return definition;
+
+            //var response = await client.GetAsync("blah");
+            //await response.Content.ReadAsStringAsync();
+
+            //var x = await client.PostAsync("url", new StringContent(JsonConvert.SerializeObject(word), Encoding.UTF8));
+            //var y = JsonConvert.DeserializeObject<string>(await x.Content.ReadAsStringAsync());
+        }
+        
         public void Reshuffle()
         {
             if (!animateShuffle)
@@ -87,7 +107,7 @@ namespace Stringscapes
         void NextPageAnimation()
         {
             if (animateNextPage)
-            { 
+            {
                 wordBoxPosition = Vector2.SmoothStep(previousWordBoxPosition, startWordAnimationPosition, nextPageLerpCount);
 
                 nextPageLerpCount += 0.05f;
@@ -131,6 +151,10 @@ namespace Stringscapes
             {
                 SpriteEffects = SpriteEffects.FlipHorizontally
             };
+            client = new HttpClient();
+            client.DefaultRequestHeaders.Add("app_id", "e8e7ecee");
+            client.DefaultRequestHeaders.Add("app_key", "610cfa0b0947d48788edd521c5542dfb");
+            
         }
 
         public void Update(MouseState mouse)
@@ -142,20 +166,20 @@ namespace Stringscapes
             }
 
             ShuffleAnimation();
-            
+
             if (!animateNextPage)
             {
                 wordBoxPosition = new Vector2(wordsStartPos - (2 * padding.X + wordPageSize) * wordPage, 50);
 
-                if (previousWordBoxPosition != wordBoxPosition && previousWordBoxPosition != Vector2.Zero)
-                {
-                    animateNextPage = true;
-                    startWordAnimationPosition = wordBoxPosition;
-                }
+                //if (previousWordBoxPosition != wordBoxPosition && previousWordBoxPosition != Vector2.Zero)
+                //{
+                //    animateNextPage = true;
+                //    startWordAnimationPosition = wordBoxPosition;
+                //}
                 previousWordBoxPosition = wordBoxPosition;
             }
-            NextPageAnimation();
-            
+            // NextPageAnimation();
+
             bool firstClickCheck = false;
             bool isNoneClicked = true;
             for (int i = 0; i < letters.Count; i++)
@@ -228,20 +252,17 @@ namespace Stringscapes
             }
             previousState = mouse;
 
-
         }
-
-
 
         public void Draw(SpriteBatch spriteBatch)
         {
             wordPageSize = GraphicsDevice.Viewport.Width - wordsStartPos;
-            int rowsPerColumn = 1;
-   
+            int rowsPerColumn = 6;
+
             for (int col = 0; col < CorrectWords.Count; col += rowsPerColumn)
             {
                 for (int row = 0; row < rowsPerColumn; row++)
-                {                    
+                {
                     var index = col + row;
                     if (index >= CorrectWords.Count) { break; }
 

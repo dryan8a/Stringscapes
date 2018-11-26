@@ -37,10 +37,7 @@ namespace Stringscapes
             base.Initialize();
         }
 
-        int drawCounter = 0;
-        int updateCounter = 0;
-
-        protected override void LoadContent()
+        protected override async void LoadContent()
         {
             
             using (StreamReader stream = new StreamReader("words.txt"))
@@ -73,22 +70,17 @@ namespace Stringscapes
             {
                 Scale = new Vector2(.25f)
             };
+            await stringscape.GetDef("dirt");
         }
 
         protected override void Update(GameTime gameTime)
         {
-            updateCounter++;
-
-            if(gameTime.IsRunningSlowly)
-            {
-                ;
-            }
 
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
             
             mouse = Mouse.GetState();
-            System.Diagnostics.Debug.WriteLine($"Mouse: ({mouse.X}, {mouse.Y})");
+            //System.Diagnostics.Debug.WriteLine($"Mouse: ({mouse.X}, {mouse.Y})");
             if (Math.Pow(reshuffleButton.Position.X + reshuffleButton.Radius - mouse.Position.X, 2) + Math.Pow(reshuffleButton.Position.Y + reshuffleButton.Radius - mouse.Position.Y, 2) <= Math.Pow(reshuffleButton.Radius,2) && mouse.LeftButton == ButtonState.Pressed && previous.LeftButton != ButtonState.Pressed)
             {
                stringscape.Reshuffle();
@@ -109,18 +101,6 @@ namespace Stringscapes
         
         protected override void Draw(GameTime gameTime)
         {
-            drawCounter++;
-
-            if(updateCounter != drawCounter)
-            {
-                ;
-            }
-
-
-            if (gameTime.IsRunningSlowly)
-            {
-                ;
-            }
 
             GraphicsDevice.Clear(Color.CornflowerBlue);
             spriteBatch.Begin();
