@@ -13,6 +13,9 @@ using Newtonsoft.Json;
 
 namespace Stringscapes
 {
+
+
+
     class Stringscape
     {
         List<Letter> letters;
@@ -49,21 +52,13 @@ namespace Stringscapes
 
         public async Task<string> GetDef(string word)
         {
-
-            HttpWebRequest req;
-            
-
             string pull = await client.GetStringAsync($"https://od-api.oxforddictionaries.com:443/api/v1/entries/en/{word.ToLower()}");
-            object definition = JsonConvert.DeserializeObject(pull);
-            //return definition;
+            var definitionObject = JsonConvert.DeserializeObject<WordDef>(pull);
+            var definition = definitionObject.Results.FirstOrDefault()?.lexicalEntries.FirstOrDefault().entries.FirstOrDefault()?.senses.FirstOrDefault()?.subsenses.FirstOrDefault()?.definitions.FirstOrDefault();
 
-            //var response = await client.GetAsync("blah");
-            //await response.Content.ReadAsStringAsync();
-
-            //var x = await client.PostAsync("url", new StringContent(JsonConvert.SerializeObject(word), Encoding.UTF8));
-            //var y = JsonConvert.DeserializeObject<string>(await x.Content.ReadAsStringAsync());
+            return definition ?? "";
         }
-        
+
         public void Reshuffle()
         {
             if (!animateShuffle)
@@ -154,7 +149,7 @@ namespace Stringscapes
             client = new HttpClient();
             client.DefaultRequestHeaders.Add("app_id", "e8e7ecee");
             client.DefaultRequestHeaders.Add("app_key", "610cfa0b0947d48788edd521c5542dfb");
-            
+
         }
 
         public void Update(MouseState mouse)
@@ -250,6 +245,7 @@ namespace Stringscapes
             {
                 wordPage++;
             }
+            
             previousState = mouse;
 
         }

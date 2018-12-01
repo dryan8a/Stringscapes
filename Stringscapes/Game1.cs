@@ -37,7 +37,7 @@ namespace Stringscapes
             base.Initialize();
         }
 
-        protected override async void LoadContent()
+        protected override void LoadContent()
         {
             
             using (StreamReader stream = new StreamReader("words.txt"))
@@ -70,7 +70,7 @@ namespace Stringscapes
             {
                 Scale = new Vector2(.25f)
             };
-            await stringscape.GetDef("dirt");
+
         }
 
         protected override void Update(GameTime gameTime)
