@@ -24,6 +24,7 @@ namespace Stringscapes
         List<int> orderOfLetters;
         BaseCircle baseCircle;
         SpriteFont letterFont;
+        private readonly SpriteFont definitionFont;
         SpriteFont wordListFont;
         Texture2D letterTexture;
         GraphicsDevice GraphicsDevice;
@@ -121,12 +122,13 @@ namespace Stringscapes
             }
         }
 
-        public Stringscape(string word, Texture2D baseCircleTexture, Texture2D letterTexture, Texture2D arrowTexture, GraphicsDevice GraphicsDevice, SpriteFont letterFont, SpriteFont wordListFont)
+        public Stringscape(string word, Texture2D baseCircleTexture, Texture2D letterTexture, Texture2D arrowTexture, GraphicsDevice GraphicsDevice, SpriteFont letterFont, SpriteFont wordListFont, SpriteFont definitionFont)
         {
             word = word.ToUpper();
             baseWord = word;
             newShufflePositions = new Vector2[baseWord.Length];
             this.letterFont = letterFont;
+            this.definitionFont = definitionFont;
             baseCircle = new BaseCircle(baseCircleTexture, new Vector2(0, GraphicsDevice.Viewport.Height - baseCircleTexture.Height), new Color(Color.LightSteelBlue, 235), GraphicsDevice, letterTexture.Width / 2, word.Length);
             letters = new List<Letter>();
             this.letterTexture = letterTexture;
@@ -259,9 +261,12 @@ namespace Stringscapes
                     displayedDefinition = GetDef(CorrectWords[i].word).Result;
                     alreadyGotDef = true;
                 }
-                if(alreadyGotDef && !MouseRect.Intersects(CorrectWords[i].Bounds))
+                if(alreadyGotDef)
                 {
-                    continueShowDefCheckCount++; 
+                    if(!MouseRect.Intersects(CorrectWords[i].Bounds) || mouse.LeftButton != ButtonState.Pressed)
+                    {
+                        continueShowDefCheckCount++; 
+                    }                    
                 }
             }
             if(continueShowDefCheckCount == CorrectWords.Count)
@@ -287,11 +292,21 @@ namespace Stringscapes
                     if (index >= CorrectWords.Count) { break; }
 
                     CorrectWords[index].UpdatePosition(wordBoxPosition + new Vector2(col / rowsPerColumn * (LongestWordSize.X + padding.X), row * (LongestWordSize.Y + padding.Y)));
-                    CorrectWords[index].Draw(spriteBatch);
+                    CorrectWords[index].Draw(spriteBatch,GraphicsDevice);
                 }
             }
-
-            //spriteBatch.DrawString(wordListFont, desplayedDefinition,, Color.Black);
+            for (int i = 0; i < displayedDefinition.Length / 54 + 1; i++)
+            {
+                string section = "";
+                for (int charIndex = 0; charIndex < 54; charIndex++)
+                {
+                    if (charIndex + i*54 >= displayedDefinition.Length) break;
+                    section += displayedDefinition[charIndex + i*54];
+                }
+                spriteBatch.DrawString(definitionFont, section, new Vector2(900, 750 + i*40), Color.Black);
+            }
+            
+            
 
             backdrop.Draw(spriteBatch);
             baseCircle.Draw(spriteBatch);

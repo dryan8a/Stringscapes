@@ -27,11 +27,11 @@ namespace Stringscapes
         public void UpdatePosition(Vector2 position)
         {
             Position = position;
-            Bounds = new Rectangle(Position.ToPoint(), wordSize.ToPoint());
+            Bounds = new Rectangle(position.ToPoint(), wordSize.ToPoint());
         }
 
-        public void Draw(SpriteBatch spriteBatch)
-        {
+        public void Draw(SpriteBatch spriteBatch,GraphicsDevice graphicsDevice)
+        {            
             spriteBatch.DrawString(wordFont, word, Position, Color.Black);
         }
     }

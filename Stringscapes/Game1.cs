@@ -57,6 +57,7 @@ namespace Stringscapes
             Texture2D arrowTexture = Content.Load<Texture2D>("arrow");
             SpriteFont letterFont = Content.Load<SpriteFont>("font");
             wordListFont = Content.Load<SpriteFont>("WordListFont");
+            SpriteFont definitionFont = Content.Load<SpriteFont>("definitionFont");
             string baseWord = "";
             while (baseWord == "")
             {
@@ -66,7 +67,7 @@ namespace Stringscapes
                     baseWord = words[wordIndex];
                 }
             }
-            stringscape = new Stringscape(baseWord, baseCircleTexture, letterTexture,arrowTexture, GraphicsDevice, letterFont,wordListFont);
+            stringscape = new Stringscape(baseWord, baseCircleTexture, letterTexture,arrowTexture, GraphicsDevice, letterFont, wordListFont, definitionFont);
             reshuffleButton = new Sprite(Content.Load<Texture2D>("cycle"), Vector2.Zero, Color.LightGray, GraphicsDevice)
             {
                 Scale = new Vector2(.25f)

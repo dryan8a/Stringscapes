@@ -37,6 +37,13 @@
 /processorParam:TextureFormat=Color
 /build:cycle.png
 
+#begin definitionFont.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:PremultiplyAlpha=True
+/processorParam:TextureFormat=Compressed
+/build:definitionFont.spritefont
+
 #begin font.spritefont
 /importer:FontDescriptionImporter
 /processor:FontDescriptionProcessor
