@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using System.Net;
 using System.Net.Http;
 using Newtonsoft.Json;
+using System.Threading;
 
 namespace Stringscapes
 {
@@ -23,7 +24,7 @@ namespace Stringscapes
         List<int> orderOfLetters;
         BaseCircle baseCircle;
         SpriteFont letterFont;
-        readonly SpriteFont wordListFont;
+        SpriteFont wordListFont;
         Texture2D letterTexture;
         GraphicsDevice GraphicsDevice;
         Sprite backdrop;
@@ -40,7 +41,7 @@ namespace Stringscapes
         float shuffleLerpCount = 0;
         float nextPageLerpCount = 0;
         int wordPage = 0;
-        public List<string> CorrectWords = new List<string>();
+        public List<CorrectWord> CorrectWords = new List<CorrectWord>();
         public Vector2 LongestWordSize;
         Vector2 wordBoxPosition;
         Vector2 previousWordBoxPosition;
@@ -49,10 +50,14 @@ namespace Stringscapes
         Vector2 padding = new Vector2(10, 10);
         int wordPageSize = 0;
         HttpClient client;
+        string displayedDefinition;
+        bool alreadyGotDef = false;
+        int continueShowDefCheckCount = 0;
 
-        public async Task<string> GetDef(string word)
+
+        async Task<string> GetDef(string word)
         {
-            string pull = await client.GetStringAsync($"https://od-api.oxforddictionaries.com:443/api/v1/entries/en/{word.ToLower()}");
+            string pull = await client.GetStringAsync($"https://od-api.oxforddictionaries.com:443/api/v1/entries/en/{word.ToLower()}").ConfigureAwait(false);
             var definitionObject = JsonConvert.DeserializeObject<WordDef>(pull);
             var definition = definitionObject.Results.FirstOrDefault()?.lexicalEntries.FirstOrDefault().entries.FirstOrDefault()?.senses.FirstOrDefault()?.subsenses.FirstOrDefault()?.definitions.FirstOrDefault();
 
@@ -99,6 +104,7 @@ namespace Stringscapes
                 }
             }
         }
+
         void NextPageAnimation()
         {
             if (animateNextPage)
@@ -121,7 +127,6 @@ namespace Stringscapes
             baseWord = word;
             newShufflePositions = new Vector2[baseWord.Length];
             this.letterFont = letterFont;
-            this.wordListFont = wordListFont;
             baseCircle = new BaseCircle(baseCircleTexture, new Vector2(0, GraphicsDevice.Viewport.Height - baseCircleTexture.Height), new Color(Color.LightSteelBlue, 235), GraphicsDevice, letterTexture.Width / 2, word.Length);
             letters = new List<Letter>();
             this.letterTexture = letterTexture;
@@ -140,6 +145,7 @@ namespace Stringscapes
             currentWord = "";
             orderOfLetters = new List<int>();
             wordsStartPos = 850;
+            this.wordListFont = wordListFont;
             LongestWordSize = wordListFont.MeasureString("DDDDDDDD");
             leftArrow = new Sprite(arrowTexture, new Vector2(900, 600), Color.White, GraphicsDevice);
             rightArrow = new Sprite(arrowTexture, new Vector2(GraphicsDevice.Viewport.Width - arrowTexture.Width - 50, 600), Color.White, GraphicsDevice)
@@ -245,9 +251,27 @@ namespace Stringscapes
             {
                 wordPage++;
             }
-            
-            previousState = mouse;
 
+            for(int i = 0;i<CorrectWords.Count;i++)
+            {
+                if(MouseRect.Intersects(CorrectWords[i].Bounds) && mouse.LeftButton == ButtonState.Pressed && !alreadyGotDef)
+                {
+                    displayedDefinition = GetDef(CorrectWords[i].word).Result;
+                    alreadyGotDef = true;
+                }
+                if(alreadyGotDef && !MouseRect.Intersects(CorrectWords[i].Bounds))
+                {
+                    continueShowDefCheckCount++; 
+                }
+            }
+            if(continueShowDefCheckCount == CorrectWords.Count)
+            {
+                alreadyGotDef = false;
+                displayedDefinition = "";
+            }
+            continueShowDefCheckCount = 0;
+
+            previousState = mouse;
         }
 
         public void Draw(SpriteBatch spriteBatch)
@@ -259,14 +283,15 @@ namespace Stringscapes
             {
                 for (int row = 0; row < rowsPerColumn; row++)
                 {
-                    var index = col + row;
+                    int index = col + row;
                     if (index >= CorrectWords.Count) { break; }
 
-                    var pos = wordBoxPosition + new Vector2(col / rowsPerColumn * (LongestWordSize.X + padding.X), row * (LongestWordSize.Y + padding.Y));
-                    spriteBatch.DrawString(wordListFont, CorrectWords[index], pos, Color.Black);
+                    CorrectWords[index].UpdatePosition(wordBoxPosition + new Vector2(col / rowsPerColumn * (LongestWordSize.X + padding.X), row * (LongestWordSize.Y + padding.Y)));
+                    CorrectWords[index].Draw(spriteBatch);
                 }
             }
 
+            //spriteBatch.DrawString(wordListFont, desplayedDefinition,, Color.Black);
 
             backdrop.Draw(spriteBatch);
             baseCircle.Draw(spriteBatch);

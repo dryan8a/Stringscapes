@@ -17,7 +17,7 @@ namespace Stringscapes
         Sprite reshuffleButton;
         MouseState previous;
         Random gen = new Random();
-
+        SpriteFont wordListFont;
         Dictionary<int, string> words = new Dictionary<int, string>();
 
         public Game1()
@@ -56,6 +56,7 @@ namespace Stringscapes
             Texture2D letterTexture = Content.Load<Texture2D>("LetterCircle");
             Texture2D arrowTexture = Content.Load<Texture2D>("arrow");
             SpriteFont letterFont = Content.Load<SpriteFont>("font");
+            wordListFont = Content.Load<SpriteFont>("WordListFont");
             string baseWord = "";
             while (baseWord == "")
             {
@@ -65,7 +66,7 @@ namespace Stringscapes
                     baseWord = words[wordIndex];
                 }
             }
-            stringscape = new Stringscape(baseWord, baseCircleTexture, letterTexture,arrowTexture, GraphicsDevice, letterFont,Content.Load<SpriteFont>("WordListFont"));
+            stringscape = new Stringscape(baseWord, baseCircleTexture, letterTexture,arrowTexture, GraphicsDevice, letterFont,wordListFont);
             reshuffleButton = new Sprite(Content.Load<Texture2D>("cycle"), Vector2.Zero, Color.LightGray, GraphicsDevice)
             {
                 Scale = new Vector2(.25f)
@@ -89,9 +90,18 @@ namespace Stringscapes
             stringscape.Update(mouse);
             if(stringscape.chosenWord.Length > 2)
             {
-                if(words.ContainsValue(stringscape.chosenWord) && !stringscape.CorrectWords.Contains(stringscape.chosenWord))
+                bool containsWord = false;
+                for(int i = 0;i<stringscape.CorrectWords.Count;i++)
                 {
-                    stringscape.CorrectWords.Add(stringscape.chosenWord);
+                    if(stringscape.CorrectWords[i].word == stringscape.chosenWord)
+                    {
+                        containsWord = true;
+                    }
+                }
+
+                if(words.ContainsValue(stringscape.chosenWord) && !containsWord)
+                {
+                    stringscape.CorrectWords.Add(new CorrectWord(stringscape.chosenWord,wordListFont));
                 }
                 stringscape.chosenWord = "";
             }

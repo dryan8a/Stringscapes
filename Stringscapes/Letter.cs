@@ -20,7 +20,7 @@ namespace Stringscapes
         public bool mouseHoveringOver = false;
         Line line;
         private MouseState currentState;
-        private GraphicsDevice device;
+        private readonly GraphicsDevice device;
         public Vector2 connectingLetterPos;
 
         public Letter(Texture2D texture, Vector2 position, Color color, char letter, SpriteFont font, GraphicsDevice device,Color lineColor) : base(texture, position, color, device)
