@@ -16,12 +16,14 @@ namespace Stringscapes
         public Rectangle Bounds;
         public Vector2 Position;
         Vector2 wordSize;
+        public Color Color; 
 
         public CorrectWord(string word, SpriteFont wordFont)
         {
             this.word = word;
             this.wordFont = wordFont;
             wordSize = wordFont.MeasureString(word);
+            Color = Color.Black;
         }
 
         public void UpdatePosition(Vector2 position)
@@ -32,7 +34,7 @@ namespace Stringscapes
 
         public void Draw(SpriteBatch spriteBatch,GraphicsDevice graphicsDevice)
         {            
-            spriteBatch.DrawString(wordFont, word, Position, Color.Black);
+            spriteBatch.DrawString(wordFont, word, Position, Color);
         }
     }
 }
