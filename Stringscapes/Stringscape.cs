@@ -49,6 +49,7 @@ namespace Stringscapes
         bool animateNextPage = false;
         Vector2 padding = new Vector2(10, 10);
         int wordPageSize = 0;
+        readonly int definitionPageSize;
         HttpClient client;
         string displayedDefinition;
         int currentDefDisplayingIndex = -1;
@@ -145,6 +146,7 @@ namespace Stringscapes
             currentWord = "";
             orderOfLetters = new List<int>();
             wordsStartPos = 850;
+            definitionPageSize = GraphicsDevice.Viewport.Width - 900;
             this.wordListFont = wordListFont;
             LongestWordSize = wordListFont.MeasureString("DDDDDDDD");
             leftArrow = new Sprite(arrowTexture, new Vector2(900, 600), Color.White, GraphicsDevice);
@@ -253,9 +255,9 @@ namespace Stringscapes
                 wordPage++;
             }
 
-            for(int i = 0;i<CorrectWords.Count;i++)
+            for (int i = 0; i < CorrectWords.Count; i++)
             {
-                if(MouseRect.Intersects(CorrectWords[i].Bounds) && mouse.LeftButton == ButtonState.Pressed && currentDefDisplayingIndex < 0 && CorrectWords[i].Color != Color.Yellow && CorrectWords[i].Color != Color.Red)
+                if (MouseRect.Intersects(CorrectWords[i].Bounds) && mouse.LeftButton == ButtonState.Pressed && currentDefDisplayingIndex < 0 && CorrectWords[i].Color != Color.Yellow && CorrectWords[i].Color != Color.Red)
                 {
                     CorrectWords[i].Color = Color.Yellow;
                     if (!correctWordDefinitions.ContainsKey(CorrectWords[i].word))
@@ -278,19 +280,25 @@ namespace Stringscapes
                         catch
                         {
                             CorrectWords[i].Color = Color.Red;
+                            correctWordDefinitions.Add(CorrectWords[i].word, "");
                         }
+                    }
+                    if(correctWordDefinitions[CorrectWords[i].word] == "")
+                    {
+                        CorrectWords[i].Color = Color.Red;
+                        displayedDefinition = "";
                     }
                     else
                     {
                         CorrectWords[i].Color = Color.DarkGreen;
                         displayedDefinition = correctWordDefinitions[CorrectWords[i].word];
                     }
-                   
+
                     currentDefDisplayingIndex = i;
 
                 }
             }
-            if(currentDefDisplayingIndex >= 0 && !MouseRect.Intersects(CorrectWords[currentDefDisplayingIndex].Bounds) && mouse.LeftButton == ButtonState.Pressed)
+            if (currentDefDisplayingIndex >= 0 && !MouseRect.Intersects(CorrectWords[currentDefDisplayingIndex].Bounds) && mouse.LeftButton == ButtonState.Pressed)
             {
                 displayedDefinition = "";
                 CorrectWords[currentDefDisplayingIndex].Color = Color.Black;
@@ -313,22 +321,22 @@ namespace Stringscapes
                     if (index >= CorrectWords.Count) { break; }
 
                     CorrectWords[index].UpdatePosition(wordBoxPosition + new Vector2(col / rowsPerColumn * (LongestWordSize.X + padding.X), row * (LongestWordSize.Y + padding.Y)));
-                    CorrectWords[index].Draw(spriteBatch,GraphicsDevice);
+                    CorrectWords[index].Draw(spriteBatch, GraphicsDevice);
                 }
             }
 
-            int lettersPerLine = 52;
-            for (int i = 0; i < displayedDefinition.Length / lettersPerLine + 1; i++)
+            int lettersPerLine = 49;
+            for (int lines = 0; lines < displayedDefinition.Length / lettersPerLine + 1; lines++)
             {
                 string section = "";
-                for (int charIndex = 0; charIndex < lettersPerLine; charIndex++)
+                for (int charindex = 0; charindex < lettersPerLine; charindex++)
                 {
-                    if (charIndex + i*lettersPerLine >= displayedDefinition.Length) break;
-                    section += displayedDefinition[charIndex + i*lettersPerLine];
+                    if (charindex + lines*lettersPerLine >= displayedDefinition.Length) break;
+                    section += displayedDefinition[charindex + lines*lettersPerLine];
                 }
-                spriteBatch.DrawString(definitionFont, section, new Vector2(900, 750 + i*55), Color.Black);
+                spriteBatch.DrawString(definitionFont, section, new Vector2(900, 750 + lines * 55), Color.Black);
             }
-                       
+
             backdrop.Draw(spriteBatch);
             baseCircle.Draw(spriteBatch);
 
