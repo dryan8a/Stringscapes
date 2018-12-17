@@ -59,9 +59,9 @@ namespace Stringscapes
             string pull = await client.GetStringAsync($"https://od-api.oxforddictionaries.com:443/api/v1/entries/en/{word.ToLower()}").ConfigureAwait(false);
             var definitionObject = JsonConvert.DeserializeObject<WordDef>(pull);
             var x = definitionObject.Results.FirstOrDefault()?.lexicalEntries.FirstOrDefault()?.entries.FirstOrDefault()?.senses.FirstOrDefault();
-            var definition = x.definitions != null && x.definitions.Length > 0 ? x.definitions.FirstOrDefault() : x.subsenses.FirstOrDefault()?.definitions?.FirstOrDefault();
+            var definitions = x.definitions != null && x.definitions.Length > 0 ? x.definitions.FirstOrDefault() : x.subsenses.FirstOrDefault()?.definitions?.FirstOrDefault();
 
-            return definition ?? "";
+            return definitions ?? "";
         }
 
         public void Reshuffle()
@@ -324,17 +324,26 @@ namespace Stringscapes
                     CorrectWords[index].Draw(spriteBatch, GraphicsDevice);
                 }
             }
-
-            int lettersPerLine = 49;
-            for (int lines = 0; lines < displayedDefinition.Length / lettersPerLine + 1; lines++)
+            
+            if (displayedDefinition != "")
             {
-                string section = "";
-                for (int charindex = 0; charindex < lettersPerLine; charindex++)
+                string[] wordsInDefinition = displayedDefinition.Split(' ');
+                string lineString = "";
+                int line = 0;
+                for(int i = 0;i<wordsInDefinition.Length;i++)
                 {
-                    if (charindex + lines*lettersPerLine >= displayedDefinition.Length) break;
-                    section += displayedDefinition[charindex + lines*lettersPerLine];
+                    if(definitionFont.MeasureString(lineString + wordsInDefinition[i]).X <= definitionPageSize)
+                    {
+                        lineString += wordsInDefinition[i] + " ";
+                    }
+                    else
+                    {
+                        spriteBatch.DrawString(definitionFont, lineString, new Vector2(900, 750 + line * 55), Color.Black);
+                        lineString = wordsInDefinition[i] + " ";
+                        line++;
+                    }
                 }
-                spriteBatch.DrawString(definitionFont, section, new Vector2(900, 750 + lines * 55), Color.Black);
+                spriteBatch.DrawString(definitionFont, lineString, new Vector2(900, 750 + line * 55), Color.Black);
             }
 
             backdrop.Draw(spriteBatch);
