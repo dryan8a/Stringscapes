@@ -29,6 +29,8 @@ namespace Stringscapes
         Sprite backdrop;
         Sprite leftArrow;
         Sprite rightArrow;
+        Sprite upArrow;
+        Sprite downArrow;
         string baseWord = "";
         public string chosenWord = "";
         Random gen = new Random();
@@ -41,7 +43,7 @@ namespace Stringscapes
         float nextPageLerpCount = 0;
         int wordPage = 0;
         public List<CorrectWord> CorrectWords = new List<CorrectWord>();
-        Dictionary<string, string> correctWordDefinitions;
+        Dictionary<string, string[]> correctWordDefinitions;
         public Vector2 LongestWordSize;
         Vector2 wordBoxPosition;
         Vector2 previousWordBoxPosition;
@@ -52,16 +54,18 @@ namespace Stringscapes
         readonly int definitionPageSize;
         HttpClient client;
         string displayedDefinition;
-        int currentDefDisplayingIndex = -1;
+        int definedWordIndex = -1;
+        int wordDefinitionIndex = 0;
+        
 
-        async Task<string> GetDef(string word)
+        async Task<string[]> GetDef(string word)
         {
             string pull = await client.GetStringAsync($"https://od-api.oxforddictionaries.com:443/api/v1/entries/en/{word.ToLower()}").ConfigureAwait(false);
             var definitionObject = JsonConvert.DeserializeObject<WordDef>(pull);
             var x = definitionObject.Results.FirstOrDefault()?.lexicalEntries.FirstOrDefault()?.entries.FirstOrDefault()?.senses.FirstOrDefault();
-            var definitions = x.definitions != null && x.definitions.Length > 0 ? x.definitions.FirstOrDefault() : x.subsenses.FirstOrDefault()?.definitions?.FirstOrDefault();
+            var definitions = x.definitions != null && x.definitions.Length > 0 ? x.definitions : x.subsenses.FirstOrDefault()?.definitions;
 
-            return definitions ?? "";
+            return definitions;
         }
 
         public void Reshuffle()
@@ -121,7 +125,7 @@ namespace Stringscapes
             }
         }
 
-        public Stringscape(string word, Texture2D baseCircleTexture, Texture2D letterTexture, Texture2D arrowTexture, GraphicsDevice GraphicsDevice, SpriteFont letterFont, SpriteFont wordListFont, SpriteFont definitionFont)
+        public Stringscape(string word, Texture2D baseCircleTexture, Texture2D letterTexture, Texture2D leftRightArrowTexture, Texture2D upDownArrowTexture, GraphicsDevice GraphicsDevice, SpriteFont letterFont, SpriteFont wordListFont, SpriteFont definitionFont)
         {
             word = word.ToUpper();
             baseWord = word;
@@ -146,19 +150,25 @@ namespace Stringscapes
             currentWord = "";
             orderOfLetters = new List<int>();
             wordsStartPos = 850;
-            definitionPageSize = GraphicsDevice.Viewport.Width - 900;
+            definitionPageSize = GraphicsDevice.Viewport.Width - 1050;
             this.wordListFont = wordListFont;
             LongestWordSize = wordListFont.MeasureString("DDDDDDDD");
-            leftArrow = new Sprite(arrowTexture, new Vector2(900, 600), Color.White, GraphicsDevice);
-            rightArrow = new Sprite(arrowTexture, new Vector2(GraphicsDevice.Viewport.Width - arrowTexture.Width - 50, 600), Color.White, GraphicsDevice)
+            leftArrow = new Sprite(leftRightArrowTexture, new Vector2(900, 600), Color.White, GraphicsDevice);
+            rightArrow = new Sprite(leftRightArrowTexture, new Vector2(GraphicsDevice.Viewport.Width - leftRightArrowTexture.Width - 50, 600), Color.White, GraphicsDevice)
             {
                 SpriteEffects = SpriteEffects.FlipHorizontally
             };
+            upArrow = new Sprite(upDownArrowTexture, new Vector2(900, 750), Color.White, GraphicsDevice);
+            downArrow = new Sprite(upDownArrowTexture, new Vector2(900, 750 + upDownArrowTexture.Height + 50), Color.White, GraphicsDevice)
+            {
+                SpriteEffects = SpriteEffects.FlipVertically
+            };
+
             client = new HttpClient();
             client.DefaultRequestHeaders.Add("app_id", "e8e7ecee");
             client.DefaultRequestHeaders.Add("app_key", "610cfa0b0947d48788edd521c5542dfb");
             displayedDefinition = "";
-            correctWordDefinitions = new Dictionary<string, string>();
+            correctWordDefinitions = new Dictionary<string, string[]>();
         }
 
         public void Update(MouseState mouse)
@@ -257,7 +267,7 @@ namespace Stringscapes
 
             for (int i = 0; i < CorrectWords.Count; i++)
             {
-                if (MouseRect.Intersects(CorrectWords[i].Bounds) && mouse.LeftButton == ButtonState.Pressed && currentDefDisplayingIndex < 0 && CorrectWords[i].Color != Color.Yellow && CorrectWords[i].Color != Color.Red)
+                if (MouseRect.Intersects(CorrectWords[i].Bounds) && mouse.LeftButton == ButtonState.Pressed && definedWordIndex < 0 && CorrectWords[i].Color != Color.Yellow && CorrectWords[i].Color != Color.Red)
                 {
                     CorrectWords[i].Color = Color.Yellow;
                     if (!correctWordDefinitions.ContainsKey(CorrectWords[i].word))
@@ -268,8 +278,10 @@ namespace Stringscapes
                             x.Wait();
                             if (x.IsCompleted)
                             {
-                                displayedDefinition = x.Result;
-                                correctWordDefinitions.Add(CorrectWords[i].word, displayedDefinition);
+                                wordDefinitionIndex = 0;
+                                correctWordDefinitions.Add(CorrectWords[i].word, x.Result);
+                                displayedDefinition = correctWordDefinitions[CorrectWords[i].word][wordDefinitionIndex];
+
                                 CorrectWords[i].Color = Color.DarkGreen;
                             }
                             else if (x.IsFaulted)
@@ -280,29 +292,29 @@ namespace Stringscapes
                         catch
                         {
                             CorrectWords[i].Color = Color.Red;
-                            correctWordDefinitions.Add(CorrectWords[i].word, "");
+                            correctWordDefinitions.Add(CorrectWords[i].word, new string[1] { "" });
                         }
                     }
-                    if(correctWordDefinitions[CorrectWords[i].word] == "")
+                    if (correctWordDefinitions[CorrectWords[i].word][0] == "")
                     {
                         CorrectWords[i].Color = Color.Red;
                         displayedDefinition = "";
                     }
                     else
                     {
+                        wordDefinitionIndex = 0;
                         CorrectWords[i].Color = Color.DarkGreen;
-                        displayedDefinition = correctWordDefinitions[CorrectWords[i].word];
+                        displayedDefinition = correctWordDefinitions[CorrectWords[i].word][wordDefinitionIndex];
                     }
 
-                    currentDefDisplayingIndex = i;
-
+                    definedWordIndex = i;
                 }
             }
-            if (currentDefDisplayingIndex >= 0 && !MouseRect.Intersects(CorrectWords[currentDefDisplayingIndex].Bounds) && mouse.LeftButton == ButtonState.Pressed)
+            if (definedWordIndex >= 0 && !MouseRect.Intersects(CorrectWords[definedWordIndex].Bounds) && mouse.LeftButton == ButtonState.Pressed)
             {
                 displayedDefinition = "";
-                CorrectWords[currentDefDisplayingIndex].Color = Color.Black;
-                currentDefDisplayingIndex = -1;
+                CorrectWords[definedWordIndex].Color = Color.Black;
+                definedWordIndex = -1;
             }
 
             previousState = mouse;
@@ -324,26 +336,26 @@ namespace Stringscapes
                     CorrectWords[index].Draw(spriteBatch, GraphicsDevice);
                 }
             }
-            
+
             if (displayedDefinition != "")
             {
                 string[] wordsInDefinition = displayedDefinition.Split(' ');
                 string lineString = "";
                 int line = 0;
-                for(int i = 0;i<wordsInDefinition.Length;i++)
+                for (int i = 0; i < wordsInDefinition.Length; i++)
                 {
-                    if(definitionFont.MeasureString(lineString + wordsInDefinition[i]).X <= definitionPageSize)
+                    if (definitionFont.MeasureString(lineString + wordsInDefinition[i]).X <= definitionPageSize)
                     {
                         lineString += wordsInDefinition[i] + " ";
                     }
                     else
                     {
-                        spriteBatch.DrawString(definitionFont, lineString, new Vector2(900, 750 + line * 55), Color.Black);
+                        spriteBatch.DrawString(definitionFont, lineString, new Vector2(1050, 750 + line * 55), Color.Black);
                         lineString = wordsInDefinition[i] + " ";
                         line++;
                     }
                 }
-                spriteBatch.DrawString(definitionFont, lineString, new Vector2(900, 750 + line * 55), Color.Black);
+                spriteBatch.DrawString(definitionFont, lineString, new Vector2(1050, 750 + line * 55), Color.Black);
             }
 
             backdrop.Draw(spriteBatch);

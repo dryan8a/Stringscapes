@@ -54,7 +54,8 @@ namespace Stringscapes
             spriteBatch = new SpriteBatch(GraphicsDevice);            
             Texture2D baseCircleTexture = Content.Load<Texture2D>("nonBlurryCircleScaled");
             Texture2D letterTexture = Content.Load<Texture2D>("LetterCircle");
-            Texture2D arrowTexture = Content.Load<Texture2D>("arrow");
+            Texture2D leftRightArrowTexture = Content.Load<Texture2D>("arrow");
+            Texture2D upDownArrowTexture = Content.Load<Texture2D>("upArrow");
             SpriteFont letterFont = Content.Load<SpriteFont>("font");
             wordListFont = Content.Load<SpriteFont>("WordListFont");
             SpriteFont definitionFont = Content.Load<SpriteFont>("definitionFont");
@@ -67,7 +68,7 @@ namespace Stringscapes
                     baseWord = words[wordIndex];
                 }
             }
-            stringscape = new Stringscape(baseWord, baseCircleTexture, letterTexture,arrowTexture, GraphicsDevice, letterFont, wordListFont, definitionFont);
+            stringscape = new Stringscape(baseWord, baseCircleTexture, letterTexture,leftRightArrowTexture,upDownArrowTexture, GraphicsDevice, letterFont, wordListFont, definitionFont);
             reshuffleButton = new Sprite(Content.Load<Texture2D>("cycle"), Vector2.Zero, Color.LightGray, GraphicsDevice)
             {
                 Scale = new Vector2(.25f)
