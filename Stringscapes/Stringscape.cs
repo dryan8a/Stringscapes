@@ -159,7 +159,7 @@ namespace Stringscapes
                 SpriteEffects = SpriteEffects.FlipHorizontally
             };
             upArrow = new Sprite(upDownArrowTexture, new Vector2(900, 750), Color.White, GraphicsDevice);
-            downArrow = new Sprite(upDownArrowTexture, new Vector2(900, 750 + upDownArrowTexture.Height + 50), Color.White, GraphicsDevice)
+            downArrow = new Sprite(upDownArrowTexture, new Vector2(900, 750 + upDownArrowTexture.Height + 25), Color.White, GraphicsDevice)
             {
                 SpriteEffects = SpriteEffects.FlipVertically
             };
@@ -256,13 +256,28 @@ namespace Stringscapes
                 }
             }
 
-            if (leftArrow.Bounds.Intersects(MouseRect) && mouse.LeftButton == ButtonState.Pressed && wordPage != 0 && previousState.LeftButton == ButtonState.Released)
+            if (mouse.LeftButton == ButtonState.Pressed && previousState.LeftButton == ButtonState.Released)
             {
-                wordPage--;
-            }
-            else if (rightArrow.Bounds.Intersects(MouseRect) && mouse.LeftButton == ButtonState.Pressed && previousState.LeftButton == ButtonState.Released)
-            {
-                wordPage++;
+                if (leftArrow.Bounds.Intersects(MouseRect) && wordPage != 0)
+                {
+                    wordPage--;
+                }
+                else if (rightArrow.Bounds.Intersects(MouseRect))
+                {
+                    wordPage++;
+                }
+                else if (displayedDefinition != "")
+                {
+                    if (upArrow.Bounds.Intersects(MouseRect) && wordDefinitionIndex > 0)
+                    {
+                        wordDefinitionIndex--;
+                    }
+                    else if (downArrow.Bounds.Intersects(MouseRect) && wordDefinitionIndex < correctWordDefinitions[CorrectWords[definedWordIndex].word].Length - 1)
+                    {
+                        wordDefinitionIndex++;
+                    }
+                }
+                
             }
 
             for (int i = 0; i < CorrectWords.Count; i++)
@@ -310,7 +325,7 @@ namespace Stringscapes
                     definedWordIndex = i;
                 }
             }
-            if (definedWordIndex >= 0 && !MouseRect.Intersects(CorrectWords[definedWordIndex].Bounds) && mouse.LeftButton == ButtonState.Pressed)
+            if (definedWordIndex >= 0 && !MouseRect.Intersects(CorrectWords[definedWordIndex].Bounds) && !MouseRect.Intersects(upArrow.Bounds) && !MouseRect.Intersects(downArrow.Bounds) && mouse.LeftButton == ButtonState.Pressed)
             {
                 displayedDefinition = "";
                 CorrectWords[definedWordIndex].Color = Color.Black;
@@ -375,6 +390,8 @@ namespace Stringscapes
 
             leftArrow.Draw(spriteBatch);
             rightArrow.Draw(spriteBatch);
+            upArrow.Draw(spriteBatch);
+            downArrow.Draw(spriteBatch);
         }
     }
 }
