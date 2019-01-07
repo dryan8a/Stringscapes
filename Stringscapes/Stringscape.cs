@@ -63,9 +63,48 @@ namespace Stringscapes
             string pull = await client.GetStringAsync($"https://od-api.oxforddictionaries.com:443/api/v1/entries/en/{word.ToLower()}").ConfigureAwait(false);
             var definitionObject = JsonConvert.DeserializeObject<WordDef>(pull);
             var x = definitionObject.Results.FirstOrDefault()?.lexicalEntries.FirstOrDefault()?.entries.FirstOrDefault()?.senses.FirstOrDefault();
-            var definitions = x.definitions != null && x.definitions.Length > 0 ? x.definitions : x.subsenses.FirstOrDefault()?.definitions;
-
-            return definitions;
+            //var definitions = x.definitions != null && x.definitions.Length > 0 ? x.definitions : x.subsenses.FirstOrDefault()?.definitions;
+            var definitions = new List<string>();
+            if (definitionObject.Results != null)
+            {
+                foreach (var result in definitionObject.Results)
+                {
+                    if (result.lexicalEntries != null)
+                    {
+                        foreach (var lexicalEntry in result.lexicalEntries)
+                        {
+                            if (lexicalEntry.entries != null)
+                            {
+                                foreach (var entry in lexicalEntry.entries)
+                                {
+                                    if (entry.senses != null)
+                                    {
+                                        foreach (var sense in entry.senses)
+                                        {
+                                            if (sense.definitions != null && sense.definitions.Length > 0 && sense.definitions[0] != null)
+                                            {
+                                                definitions.Add(sense.definitions[0]);
+                                            }
+                                            if (sense.subsenses != null)
+                                            {
+                                                foreach (var subsense in sense.subsenses)
+                                                {
+                                                    if (subsense.definitions != null && subsense.definitions.Length > 0 && subsense.definitions[0] != null)
+                                                    {
+                                                        definitions.Add(subsense.definitions[0]);
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            
+            return definitions.ToArray();
         }
 
         public void Reshuffle()
@@ -351,9 +390,10 @@ namespace Stringscapes
                     CorrectWords[index].Draw(spriteBatch, GraphicsDevice);
                 }
             }
-
+            
             if (displayedDefinition != "")
             {
+                displayedDefinition = correctWordDefinitions[CorrectWords[definedWordIndex].word][wordDefinitionIndex];
                 string[] wordsInDefinition = displayedDefinition.Split(' ');
                 string lineString = "";
                 int line = 0;
