@@ -83,7 +83,7 @@ namespace Stringscapes
                                         {
                                             if (sense.definitions != null && sense.definitions.Length > 0 && sense.definitions[0] != null)
                                             {
-                                                definitions.Add(sense.definitions[0]);
+                                                definitions.Add("(" + lexicalEntry.lexicalCategory + ") " + sense.definitions[0]);
                                             }
                                             if (sense.subsenses != null)
                                             {
@@ -91,7 +91,7 @@ namespace Stringscapes
                                                 {
                                                     if (subsense.definitions != null && subsense.definitions.Length > 0 && subsense.definitions[0] != null)
                                                     {
-                                                        definitions.Add(subsense.definitions[0]);
+                                                        definitions.Add("(" + lexicalEntry.lexicalCategory + ") " + subsense.definitions[0]);
                                                     }
                                                 }
                                             }
@@ -103,7 +103,7 @@ namespace Stringscapes
                     }
                 }
             }
-            
+
             return definitions.ToArray();
         }
 
@@ -197,8 +197,8 @@ namespace Stringscapes
             {
                 SpriteEffects = SpriteEffects.FlipHorizontally
             };
-            upArrow = new Sprite(upDownArrowTexture, new Vector2(900, 750), Color.White, GraphicsDevice);
-            downArrow = new Sprite(upDownArrowTexture, new Vector2(900, 750 + upDownArrowTexture.Height + 25), Color.White, GraphicsDevice)
+            upArrow = new Sprite(upDownArrowTexture, new Vector2(900, 750), Color.Black, GraphicsDevice);
+            downArrow = new Sprite(upDownArrowTexture, new Vector2(900, 750 + upDownArrowTexture.Height + 25), Color.Black, GraphicsDevice)
             {
                 SpriteEffects = SpriteEffects.FlipVertically
             };
@@ -316,7 +316,25 @@ namespace Stringscapes
                         wordDefinitionIndex++;
                     }
                 }
-                
+                else
+                {
+                    upArrow.Color = Color.Black;
+                    downArrow.Color = Color.Black;
+                }
+
+            }
+            if (wordDefinitionIndex == 0 && displayedDefinition != "")
+            {
+                upArrow.Color = Color.DarkSlateGray;
+            }
+            else if (displayedDefinition != "" && wordDefinitionIndex == correctWordDefinitions[CorrectWords[definedWordIndex].word].Length - 1)
+            {
+                downArrow.Color = Color.DarkSlateGray;
+            }
+            else
+            {
+                upArrow.Color = Color.Black;
+                downArrow.Color = Color.Black;
             }
 
             for (int i = 0; i < CorrectWords.Count; i++)
