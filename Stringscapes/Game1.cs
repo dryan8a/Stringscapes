@@ -68,6 +68,7 @@ namespace Stringscapes
                     baseWord = words[wordIndex];
                 }
             }
+            baseWord = "blah";
             stringscape = new Stringscape(baseWord, baseCircleTexture, letterTexture,leftRightArrowTexture,upDownArrowTexture, GraphicsDevice, letterFont, wordListFont, definitionFont);
             reshuffleButton = new Sprite(Content.Load<Texture2D>("cycle"), Vector2.Zero, Color.LightGray, GraphicsDevice)
             {

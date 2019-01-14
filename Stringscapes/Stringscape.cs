@@ -56,7 +56,7 @@ namespace Stringscapes
         string displayedDefinition;
         int definedWordIndex = -1;
         int wordDefinitionIndex = 0;
-        
+
 
         async Task<string[]> GetDef(string word)
         {
@@ -163,6 +163,8 @@ namespace Stringscapes
                 }
             }
         }
+
+
 
         public Stringscape(string word, Texture2D baseCircleTexture, Texture2D letterTexture, Texture2D leftRightArrowTexture, Texture2D upDownArrowTexture, GraphicsDevice GraphicsDevice, SpriteFont letterFont, SpriteFont wordListFont, SpriteFont definitionFont)
         {
@@ -326,10 +328,12 @@ namespace Stringscapes
             if (wordDefinitionIndex == 0 && displayedDefinition != "")
             {
                 upArrow.Color = Color.DarkSlateGray;
+                downArrow.Color = Color.Black;
             }
             else if (displayedDefinition != "" && wordDefinitionIndex == correctWordDefinitions[CorrectWords[definedWordIndex].word].Length - 1)
             {
                 downArrow.Color = Color.DarkSlateGray;
+                upArrow.Color = Color.Black;
             }
             else
             {
@@ -408,10 +412,27 @@ namespace Stringscapes
                     CorrectWords[index].Draw(spriteBatch, GraphicsDevice);
                 }
             }
-            
+
             if (displayedDefinition != "")
             {
                 displayedDefinition = correctWordDefinitions[CorrectWords[definedWordIndex].word][wordDefinitionIndex];
+
+                if (displayedDefinition.Contains("°"))
+                {
+                    int indexOfDegree = displayedDefinition.IndexOf('°');
+                    if (displayedDefinition[indexOfDegree + 1] == 'F')
+                    {
+                        displayedDefinition = displayedDefinition.Remove(indexOfDegree + 1, 1);
+                        displayedDefinition = displayedDefinition.Insert(indexOfDegree + 1, " Fahrenheit");
+                    }
+                    else if (displayedDefinition[indexOfDegree + 1] == 'C')
+                    {
+                        displayedDefinition = displayedDefinition.Remove(indexOfDegree + 1, 1);
+                        displayedDefinition = displayedDefinition.Insert(indexOfDegree + 1, " Celsius");
+                    }
+                    displayedDefinition = displayedDefinition.Replace("°", " degrees");
+                }
+
                 string[] wordsInDefinition = displayedDefinition.Split(' ');
                 string lineString = "";
                 int line = 0;
