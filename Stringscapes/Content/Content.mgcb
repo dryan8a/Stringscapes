@@ -99,6 +99,13 @@
 /processorParam:TextureFormat=Color
 /build:resizedCycle.png
 
+#begin titleFont.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:PremultiplyAlpha=True
+/processorParam:TextureFormat=Compressed
+/build:titleFont.spritefont
+
 #begin upArrow.png
 /importer:TextureImporter
 /processor:TextureProcessor

@@ -3,7 +3,6 @@
 namespace Stringscapes
 {
 
-
     public class WordDef
     {
         [JsonProperty("Metadata")]
@@ -101,6 +100,5 @@ namespace Stringscapes
         public string phoneticNotation { get; set; }
         public string phoneticSpelling { get; set; }
     }
-
 
 }

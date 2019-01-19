@@ -17,8 +17,23 @@ namespace Stringscapes
         Sprite reshuffleButton;
         MouseState previous;
         Random gen = new Random();
+        Texture2D baseCircleTexture;
+        Texture2D letterTexture;
+        Texture2D leftRightArrowTexture;
+        Texture2D upDownArrowTexture;
+        SpriteFont letterFont;
+        SpriteFont definitionFont;
         SpriteFont wordListFont;
+        SpriteFont titleFont;
         Dictionary<int, string> words = new Dictionary<int, string>();
+        enum StartScreenState
+        {
+            TitleScreen,
+            CasualOptions,
+            TimedOptions,
+            Game,
+            EndOfRoundOptions
+        }
 
         public Game1()
         {
@@ -39,42 +54,41 @@ namespace Stringscapes
 
         protected override void LoadContent()
         {
-            
+
             using (StreamReader stream = new StreamReader("words.txt"))
             {
                 int index = 0;
                 string word = "";
                 while ((word = stream.ReadLine()) != null)
                 {
-                    words.Add(index,word);
+                    words.Add(index, word);
                     index++;
                 }
-            }            
+            }
 
-            spriteBatch = new SpriteBatch(GraphicsDevice);            
-            Texture2D baseCircleTexture = Content.Load<Texture2D>("nonBlurryCircleScaled");
-            Texture2D letterTexture = Content.Load<Texture2D>("LetterCircle");
-            Texture2D leftRightArrowTexture = Content.Load<Texture2D>("arrow");
-            Texture2D upDownArrowTexture = Content.Load<Texture2D>("upArrow");
-            SpriteFont letterFont = Content.Load<SpriteFont>("font");
+            spriteBatch = new SpriteBatch(GraphicsDevice);
+            baseCircleTexture = Content.Load<Texture2D>("nonBlurryCircleScaled");
+            letterTexture = Content.Load<Texture2D>("LetterCircle");
+            leftRightArrowTexture = Content.Load<Texture2D>("arrow");
+            upDownArrowTexture = Content.Load<Texture2D>("upArrow");
+            letterFont = Content.Load<SpriteFont>("font");
             wordListFont = Content.Load<SpriteFont>("WordListFont");
-            SpriteFont definitionFont = Content.Load<SpriteFont>("definitionFont");
+            definitionFont = Content.Load<SpriteFont>("definitionFont");
+            titleFont = Content.Load<SpriteFont>("titleFont");
             string baseWord = "";
             while (baseWord == "")
             {
-                int wordIndex = gen.Next(0,words.Count);
-                if(words[wordIndex].Length >=7 && words[wordIndex].Length <=8)
+                int wordIndex = gen.Next(0, words.Count);
+                if (words[wordIndex].Length >= 7 && words[wordIndex].Length <= 8)
                 {
                     baseWord = words[wordIndex];
                 }
             }
-            baseWord = "blah";
-            stringscape = new Stringscape(baseWord, baseCircleTexture, letterTexture,leftRightArrowTexture,upDownArrowTexture, GraphicsDevice, letterFont, wordListFont, definitionFont);
+            stringscape = new Stringscape(baseWord, baseCircleTexture, letterTexture, leftRightArrowTexture, upDownArrowTexture, GraphicsDevice, letterFont, wordListFont, definitionFont);
             reshuffleButton = new Sprite(Content.Load<Texture2D>("cycle"), Vector2.Zero, Color.LightGray, GraphicsDevice)
             {
                 Scale = new Vector2(.25f)
             };
-
         }
 
         protected override void Update(GameTime gameTime)
@@ -82,43 +96,56 @@ namespace Stringscapes
 
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
-            
+
             mouse = Mouse.GetState();
             //System.Diagnostics.Debug.WriteLine($"Mouse: ({mouse.X}, {mouse.Y})");
-            if (Math.Pow(reshuffleButton.Position.X + reshuffleButton.Radius - mouse.Position.X, 2) + Math.Pow(reshuffleButton.Position.Y + reshuffleButton.Radius - mouse.Position.Y, 2) <= Math.Pow(reshuffleButton.Radius,2) && mouse.LeftButton == ButtonState.Pressed && previous.LeftButton != ButtonState.Pressed)
+
+
+            if (Math.Pow(reshuffleButton.Position.X + reshuffleButton.Radius - mouse.Position.X, 2) + Math.Pow(reshuffleButton.Position.Y + reshuffleButton.Radius - mouse.Position.Y, 2) <= Math.Pow(reshuffleButton.Radius, 2) && mouse.LeftButton == ButtonState.Pressed && previous.LeftButton != ButtonState.Pressed)
             {
-               stringscape.Reshuffle();
+                stringscape.Reshuffle();
             }
-            
+
             stringscape.Update(mouse);
-            if(stringscape.chosenWord.Length > 2)
+            if (stringscape.chosenWord.Length > 2)
             {
                 bool containsWord = false;
-                for(int i = 0;i<stringscape.CorrectWords.Count;i++)
+                for (int i = 0; i < stringscape.CorrectWords.Count; i++)
                 {
-                    if(stringscape.CorrectWords[i].word == stringscape.chosenWord)
+                    if (stringscape.CorrectWords[i].word == stringscape.chosenWord)
                     {
                         containsWord = true;
                     }
                 }
 
-                if(words.ContainsValue(stringscape.chosenWord) && !containsWord)
+                if (words.ContainsValue(stringscape.chosenWord) && !containsWord)
                 {
-                    stringscape.CorrectWords.Add(new CorrectWord(stringscape.chosenWord,wordListFont));
+                    stringscape.CorrectWords.Add(new CorrectWord(stringscape.chosenWord, wordListFont));
                 }
                 stringscape.chosenWord = "";
+
             }
+
             previous = mouse;
             base.Update(gameTime);
         }
-        
+
         protected override void Draw(GameTime gameTime)
         {
 
             GraphicsDevice.Clear(Color.CornflowerBlue);
             spriteBatch.Begin();
+
+
+
+            spriteBatch.DrawString(titleFont, "Stringscapes", new Vector2((GraphicsDevice.Viewport.Width / 2) - (titleFont.MeasureString("Stringscapes").X / 2), 50), Color.Black);
+
+
+
             stringscape.Draw(spriteBatch);
             reshuffleButton.Draw(spriteBatch);
+
+
             spriteBatch.End();
             base.Draw(gameTime);
         }

@@ -42,6 +42,7 @@ namespace Stringscapes
         float shuffleLerpCount = 0;
         float nextPageLerpCount = 0;
         int wordPage = 0;
+        int wordPageLimit = 1;
         public List<CorrectWord> CorrectWords = new List<CorrectWord>();
         Dictionary<string, string[]> correctWordDefinitions;
         public Vector2 LongestWordSize;
@@ -163,7 +164,7 @@ namespace Stringscapes
                 }
             }
         }
-
+        
 
 
         public Stringscape(string word, Texture2D baseCircleTexture, Texture2D letterTexture, Texture2D leftRightArrowTexture, Texture2D upDownArrowTexture, GraphicsDevice GraphicsDevice, SpriteFont letterFont, SpriteFont wordListFont, SpriteFont definitionFont)
@@ -297,13 +298,17 @@ namespace Stringscapes
                 }
             }
 
+            if(CorrectWords.Count >  wordPageLimit*18)
+            {
+                wordPageLimit++;
+            }
             if (mouse.LeftButton == ButtonState.Pressed && previousState.LeftButton == ButtonState.Released)
             {
-                if (leftArrow.Bounds.Intersects(MouseRect) && wordPage != 0)
+                if (leftArrow.Bounds.Intersects(MouseRect) && wordPage != 0 )
                 {
                     wordPage--;
                 }
-                else if (rightArrow.Bounds.Intersects(MouseRect))
+                else if (rightArrow.Bounds.Intersects(MouseRect) && wordPage < wordPageLimit - 1)
                 {
                     wordPage++;
                 }
@@ -343,7 +348,7 @@ namespace Stringscapes
 
             for (int i = 0; i < CorrectWords.Count; i++)
             {
-                if (MouseRect.Intersects(CorrectWords[i].Bounds) && mouse.LeftButton == ButtonState.Pressed && definedWordIndex < 0 && CorrectWords[i].Color != Color.Yellow && CorrectWords[i].Color != Color.Red)
+                if (MouseRect.Intersects(CorrectWords[i].Bounds) && mouse.LeftButton == ButtonState.Pressed && previousState.LeftButton == ButtonState.Released && definedWordIndex < 0 && CorrectWords[i].Color != Color.Yellow && CorrectWords[i].Color != Color.Red)
                 {
                     CorrectWords[i].Color = Color.Yellow;
                     if (!correctWordDefinitions.ContainsKey(CorrectWords[i].word))
@@ -412,6 +417,8 @@ namespace Stringscapes
                     CorrectWords[index].Draw(spriteBatch, GraphicsDevice);
                 }
             }
+            string pageLabel = "Page " + (wordPage + 1).ToString();
+            spriteBatch.DrawString(wordListFont, pageLabel, new Vector2((rightArrow.Position.X + rightArrow.Image.Width + leftArrow.Position.X) / 2 - (wordListFont.MeasureString(pageLabel).X /2), leftArrow.Position.Y), Color.Black);
 
             if (displayedDefinition != "")
             {
