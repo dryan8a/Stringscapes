@@ -22,6 +22,7 @@ namespace Stringscapes
         Texture2D letterTexture;
         Texture2D leftRightArrowTexture;
         Texture2D upDownArrowTexture;
+        Texture2D selectDot;
         SpriteFont letterFont;
         SpriteFont definitionFont;
         SpriteFont wordListFont;
@@ -30,6 +31,9 @@ namespace Stringscapes
         Sprite casualOptionsButton;
         Sprite timedOptionsButton;
         Sprite backArrow;
+        Sprite topSelectDot;
+        Sprite bottomSelectDot;
+
 
         enum ScreenState
         {
@@ -78,19 +82,25 @@ namespace Stringscapes
             letterTexture = Content.Load<Texture2D>("LetterCircle");
             leftRightArrowTexture = Content.Load<Texture2D>("arrow");
             upDownArrowTexture = Content.Load<Texture2D>("upArrow");
+            selectDot = Content.Load<Texture2D>("selectDot");
             letterFont = Content.Load<SpriteFont>("font");
             wordListFont = Content.Load<SpriteFont>("WordListFont");
             definitionFont = Content.Load<SpriteFont>("definitionFont");
             titleFont = Content.Load<SpriteFont>("titleFont");
 
-            var casualPixel = new Texture2D(GraphicsDevice, 1,1);
-            casualPixel.SetData(new[] { Color.White });            
-            casualOptionsButton = new Sprite(casualPixel, new Vector2(GraphicsDevice.Viewport.Width / 2 - (casualPixel.Width * wordListFont.MeasureString("- Timed").X / 2), 600), Color.TransparentBlack, GraphicsDevice) { Scale = wordListFont.MeasureString("- Timed") };
-            
-            var timedPixel = new Texture2D(GraphicsDevice, (int)wordListFont.MeasureString("- Timed").X, (int)wordListFont.MeasureString("- Timed").Y);
-            timedOptionsButton = new Sprite(timedPixel, new Vector2(GraphicsDevice.Viewport.Width / 2 - (timedPixel.Width / 2), 750), Color.TransparentBlack, GraphicsDevice);
+            var casualPixel = new Texture2D(GraphicsDevice, 1, 1);
+            casualPixel.SetData(new[] { Color.White });
+            casualOptionsButton = new Sprite(casualPixel, new Vector2(GraphicsDevice.Viewport.Width / 2 - (casualPixel.Width * wordListFont.MeasureString("- Casual").X / 2), 600), Color.TransparentBlack, GraphicsDevice) { Scale = wordListFont.MeasureString("- Casual") };
+
+            var timedPixel = new Texture2D(GraphicsDevice, 1, 1);
+            timedPixel.SetData(new[] { Color.White });
+            timedOptionsButton = new Sprite(timedPixel, new Vector2(GraphicsDevice.Viewport.Width / 2 - (timedPixel.Width * wordListFont.MeasureString("- Timed").X / 2), 750), Color.TransparentBlack, GraphicsDevice) { Scale = wordListFont.MeasureString("- Timed") };
+
 
             backArrow = new Sprite(leftRightArrowTexture, new Vector2(10, 10), Color.Black, GraphicsDevice);
+
+            topSelectDot = new Sprite(selectDot, new Vector2(GraphicsDevice.Viewport.Width / 2 - selectDot.Width, 450), Color.White, GraphicsDevice);
+            bottomSelectDot = new Sprite(selectDot, new Vector2(GraphicsDevice.Viewport.Width / 2 - selectDot.Width, 550), Color.White, GraphicsDevice);
 
             string baseWord = "";
             while (baseWord == "")
@@ -115,15 +125,13 @@ namespace Stringscapes
                 Exit();
 
             mouse = Mouse.GetState();
-            mouseRect = new Rectangle(mouse.Position, new Point(1, 1));
-
-            //System.Diagnostics.Debug.WriteLine($"Mouse: ({mouse.X}, {mouse.Y})");
 
             switch (GameState)
             {
                 case ScreenState.TitleScreen:
-                    if (mouseRect.Intersects(casualOptionsButton.Bounds))
+                    if (casualOptionsButton.Bounds.Contains(mouse.Position))
                     {
+                        casualOptionsButton.Color = Color.OrangeRed;
                         if (mouse.LeftButton == ButtonState.Pressed)
                         {
                             GameState = ScreenState.CasualOptions;
@@ -134,8 +142,9 @@ namespace Stringscapes
                         casualOptionsButton.Color = Color.TransparentBlack;
                     }
 
-                    if (mouseRect.Intersects(timedOptionsButton.Bounds))
+                    if (timedOptionsButton.Bounds.Contains(mouse.Position))
                     {
+                        timedOptionsButton.Color = Color.OrangeRed;
                         if (mouse.LeftButton == ButtonState.Pressed)
                         {
                             GameState = ScreenState.TimedOptions;
@@ -148,15 +157,43 @@ namespace Stringscapes
                     break;
 
                 case ScreenState.CasualOptions:
-                    if (mouse.LeftButton == ButtonState.Pressed && mouseRect.Intersects(backArrow.Bounds))
+                    if (topSelectDot.Bounds.Contains(mouse.Position) && mouse.LeftButton == ButtonState.Pressed)
                     {
+                        topSelectDot.Color = Color.Black;
+                        bottomSelectDot.Color = Color.White;
+                    }
+                    else if (bottomSelectDot.Bounds.Contains(mouse.Position) && mouse.LeftButton == ButtonState.Pressed)
+                    {
+                        topSelectDot.Color = Color.White;
+                        bottomSelectDot.Color = Color.Black;
+                    }
+
+
+                    if (mouse.LeftButton == ButtonState.Pressed && backArrow.Bounds.Contains(mouse.Position))
+                    {
+                        topSelectDot.Color = Color.White;
+                        bottomSelectDot.Color = Color.White;
                         GameState = ScreenState.TitleScreen;
                     }
                     break;
 
                 case ScreenState.TimedOptions:
-                    if (mouse.LeftButton == ButtonState.Pressed && mouseRect.Intersects(backArrow.Bounds))
+                    if (topSelectDot.Bounds.Contains(mouse.Position) && mouse.LeftButton == ButtonState.Pressed)
                     {
+                        topSelectDot.Color = Color.Black;
+                        bottomSelectDot.Color = Color.White;
+                    }
+                    else if (bottomSelectDot.Bounds.Contains(mouse.Position) && mouse.LeftButton == ButtonState.Pressed)
+                    {
+                        topSelectDot.Color = Color.White;
+                        bottomSelectDot.Color = Color.Black;
+                    }
+
+
+                    if (mouse.LeftButton == ButtonState.Pressed && backArrow.Bounds.Contains(mouse.Position))
+                    {
+                        topSelectDot.Color = Color.White;
+                        bottomSelectDot.Color = Color.White;
                         GameState = ScreenState.TitleScreen;
                     }
                     break;
@@ -207,16 +244,24 @@ namespace Stringscapes
                     casualOptionsButton.Draw(spriteBatch);
                     spriteBatch.DrawString(wordListFont, "- Casual", casualOptionsButton.Position, Color.Black);
                     timedOptionsButton.Draw(spriteBatch);
-                    spriteBatch.DrawString(wordListFont, "- Timed", timedOptionsButton.Position, Color.Black);                    
+                    spriteBatch.DrawString(wordListFont, "- Timed", timedOptionsButton.Position, Color.Black);
                     break;
 
                 case ScreenState.CasualOptions:
                     spriteBatch.DrawString(wordListFont, "Casual Options:", new Vector2((GraphicsDevice.Viewport.Width / 2) - (wordListFont.MeasureString("Casual Options:").X / 2), 50), Color.Black);
+                    topSelectDot.Draw(spriteBatch);
+                    spriteBatch.DrawString(definitionFont, "pages:", new Vector2(topSelectDot.Position.X + topSelectDot.Image.Width, topSelectDot.Position.Y), Color.Black);
+                    bottomSelectDot.Draw(spriteBatch);
+                    spriteBatch.DrawString(definitionFont, "words:", new Vector2(bottomSelectDot.Position.X + bottomSelectDot.Image.Width, bottomSelectDot.Position.Y), Color.Black);
                     backArrow.Draw(spriteBatch);
                     break;
 
                 case ScreenState.TimedOptions:
                     spriteBatch.DrawString(wordListFont, "Timed Options:", new Vector2((GraphicsDevice.Viewport.Width / 2) - (wordListFont.MeasureString("Timed Options:").X / 2), 50), Color.Black);
+                    topSelectDot.Draw(spriteBatch);
+                    spriteBatch.DrawString(definitionFont, "minutes:", new Vector2(topSelectDot.Position.X + topSelectDot.Image.Width, topSelectDot.Position.Y), Color.Black);
+                    bottomSelectDot.Draw(spriteBatch);
+                    spriteBatch.DrawString(definitionFont, "seconds:", new Vector2(bottomSelectDot.Position.X + bottomSelectDot.Image.Width, bottomSelectDot.Position.Y), Color.Black);
                     backArrow.Draw(spriteBatch);
                     break;
 
