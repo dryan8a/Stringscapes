@@ -13,7 +13,6 @@ namespace Stringscapes
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
         MouseState mouse;
-        Rectangle mouseRect;
         Stringscape stringscape;
         Sprite reshuffleButton;
         MouseState previous;
@@ -101,7 +100,7 @@ namespace Stringscapes
 
             topSelectDot = new Sprite(selectDot, new Vector2(GraphicsDevice.Viewport.Width / 2 - selectDot.Width, 450), Color.White, GraphicsDevice);
             bottomSelectDot = new Sprite(selectDot, new Vector2(GraphicsDevice.Viewport.Width / 2 - selectDot.Width, 550), Color.White, GraphicsDevice);
-
+            
             string baseWord = "";
             while (baseWord == "")
             {
@@ -157,12 +156,12 @@ namespace Stringscapes
                     break;
 
                 case ScreenState.CasualOptions:
-                    if (topSelectDot.Bounds.Contains(mouse.Position) && mouse.LeftButton == ButtonState.Pressed)
+                    if (mouse.LeftButton == ButtonState.Pressed && topSelectDot.Bounds.Contains(mouse.Position))
                     {
                         topSelectDot.Color = Color.Black;
                         bottomSelectDot.Color = Color.White;
                     }
-                    else if (bottomSelectDot.Bounds.Contains(mouse.Position) && mouse.LeftButton == ButtonState.Pressed)
+                    else if (mouse.LeftButton == ButtonState.Pressed && bottomSelectDot.Bounds.Contains(mouse.Position))
                     {
                         topSelectDot.Color = Color.White;
                         bottomSelectDot.Color = Color.Black;
@@ -178,12 +177,12 @@ namespace Stringscapes
                     break;
 
                 case ScreenState.TimedOptions:
-                    if (topSelectDot.Bounds.Contains(mouse.Position) && mouse.LeftButton == ButtonState.Pressed)
+                    if (mouse.LeftButton == ButtonState.Pressed && topSelectDot.Bounds.Contains(mouse.Position))
                     {
                         topSelectDot.Color = Color.Black;
                         bottomSelectDot.Color = Color.White;
                     }
-                    else if (bottomSelectDot.Bounds.Contains(mouse.Position) && mouse.LeftButton == ButtonState.Pressed)
+                    else if (mouse.LeftButton == ButtonState.Pressed && bottomSelectDot.Bounds.Contains(mouse.Position))
                     {
                         topSelectDot.Color = Color.White;
                         bottomSelectDot.Color = Color.Black;

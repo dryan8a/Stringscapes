@@ -27,7 +27,7 @@ namespace DylanMonoGameIntro
         public static Texture2D pixel;
         public SpriteEffects SpriteEffects = SpriteEffects.None;
 
-        public virtual Rectangle Bounds
+        public Rectangle Bounds
         {
             get
             {
@@ -70,7 +70,7 @@ namespace DylanMonoGameIntro
             switch(DrawBounds)
             {
                 case BoundingBoxTypes.Rectangle:
-                    spriteBatch.Draw(pixel, Position - Origin * Scale, null, Color.Red * 0.5f, 0f, Vector2.Zero, new Vector2(Image.Width, Image.Height) * Scale, SpriteEffects, 0f);            
+                    spriteBatch.Draw(pixel, Position - Origin * Scale, null, Color.Red * 0.5f, 0f, Vector2.Zero, new Vector2(Image.Width, Image.Height) * Scale, SpriteEffects, 0f);      
                     break;
 
                 case BoundingBoxTypes.Circle:
