@@ -15,18 +15,21 @@ namespace Stringscapes
         bool isClicked;
         public string currentWord;
         int cursorIndex;
+        SpriteFont font;
 
-        public Textbox(Vector2 Position, Vector2 startSize, Color color, SpriteFont font, GraphicsDevice graphicsDevice) : base(new Texture2D(graphicsDevice, 1, 1), Position, color, graphicsDevice)
-        {
-            Texture2D image = new Texture2D(graphicsDevice, (int)startSize.X, (int)startSize.Y);
+        public Textbox(Vector2 Position, Color color, SpriteFont font, GraphicsDevice graphicsDevice) : base(new Texture2D(graphicsDevice, 1, 1), Position, color, graphicsDevice)
+        {            
+            Texture2D image = new Texture2D(graphicsDevice, 1, 1);
             image.SetData(new[] { Color.White });
-
+            Image = image;
+            this.font = font;
             isClicked = false;
-            currentWord = " ";
-            cursorIndex = currentWord.Length - 1;
+            currentWord = "";
+            cursorIndex = 0;
+            Scale = font.MeasureString(" ");
         }
 
-        public void Update(MouseState mouse, KeyboardState keyboard)
+        public void Update(MouseState mouse, KeyboardState keyboard, KeyboardState previousKeyboard)
         {
             if (mouse.LeftButton == ButtonState.Pressed)
             {
@@ -42,67 +45,79 @@ namespace Stringscapes
 
             if(isClicked)
             {
-                if (keyboard.IsKeyDown(Keys.D0))
+                if (keyboard.IsKeyDown(Keys.D0) && previousKeyboard.IsKeyUp(Keys.D0))
                 {
-                    currentWord.Insert(cursorIndex, "0");
+                    currentWord = currentWord.Insert(cursorIndex, "0");
                     cursorIndex++;
                 }
-                else if (keyboard.IsKeyDown(Keys.D1))
+                else if (keyboard.IsKeyDown(Keys.D1) && previousKeyboard.IsKeyUp(Keys.D1))
                 {
-                    currentWord.Insert(cursorIndex, "1");
+                    currentWord = currentWord.Insert(cursorIndex, "1");
                     cursorIndex++;
                 }
-                else if (keyboard.IsKeyDown(Keys.D2))
+                else if (keyboard.IsKeyDown(Keys.D2) && previousKeyboard.IsKeyUp(Keys.D2))
                 {
-                    currentWord.Insert(cursorIndex, "2");
+                    currentWord = currentWord.Insert(cursorIndex, "2");
                     cursorIndex++;
                 }
-                else if (keyboard.IsKeyDown(Keys.D3))
+                else if (keyboard.IsKeyDown(Keys.D3) && previousKeyboard.IsKeyUp(Keys.D3))
                 {
-                    currentWord.Insert(cursorIndex, "3");
+                    currentWord = currentWord.Insert(cursorIndex, "3");
                     cursorIndex++;
                 }            
-                else if (keyboard.IsKeyDown(Keys.D4))
+                else if (keyboard.IsKeyDown(Keys.D4) && previousKeyboard.IsKeyUp(Keys.D4))
                 {
-                    currentWord.Insert(cursorIndex, "4");
+                    currentWord = currentWord.Insert(cursorIndex, "4");
                     cursorIndex++;
                 }
-                else if (keyboard.IsKeyDown(Keys.D5))
+                else if (keyboard.IsKeyDown(Keys.D5) && previousKeyboard.IsKeyUp(Keys.D5))
                 {
-                    currentWord.Insert(cursorIndex, "5");
+                    currentWord = currentWord.Insert(cursorIndex, "5");
                     cursorIndex++;
                 }
-                else if (keyboard.IsKeyDown(Keys.D6))
+                else if (keyboard.IsKeyDown(Keys.D6) && previousKeyboard.IsKeyUp(Keys.D6))
                 {
-                    currentWord.Insert(cursorIndex, "6");
+                    currentWord = currentWord.Insert(cursorIndex, "6");
                     cursorIndex++;
                 }
-                else if (keyboard.IsKeyDown(Keys.D7))
+                else if (keyboard.IsKeyDown(Keys.D7) && previousKeyboard.IsKeyUp(Keys.D7))
                 {
-                    currentWord.Insert(cursorIndex, "7");
+                    currentWord = currentWord.Insert(cursorIndex, "7");
                     cursorIndex++;
                 }
-                else if (keyboard.IsKeyDown(Keys.D8))
+                else if (keyboard.IsKeyDown(Keys.D8) && previousKeyboard.IsKeyUp(Keys.D8))
                 {
-                    currentWord.Insert(cursorIndex, "8");
+                    currentWord = currentWord.Insert(cursorIndex, "8");
                     cursorIndex++;
                 }
-                else if (keyboard.IsKeyDown(Keys.D9))
+                else if (keyboard.IsKeyDown(Keys.D9) && previousKeyboard.IsKeyUp(Keys.D9))
                 {
-                    currentWord.Insert(cursorIndex, "9");
+                    currentWord = currentWord.Insert(cursorIndex, "9");
                     cursorIndex++;
                 }
-                else if (keyboard.IsKeyDown(Keys.Back))
+                else if (keyboard.IsKeyDown(Keys.Back) && previousKeyboard.IsKeyUp(Keys.Back) && cursorIndex > 0)
                 {
-                    currentWord.Remove(cursorIndex, 1);
+                    currentWord = currentWord.Remove(cursorIndex - 1, 1);
+                    if (cursorIndex != 0)
+                    {
+                        cursorIndex--;
+                    }
                 }
-                else if (keyboard.IsKeyDown(Keys.Left) && cursorIndex < currentWord.Length-1)
-                {
-                    cursorIndex++;
-                }
-                else if (keyboard.IsKeyDown(Keys.Right) && cursorIndex > 0)
+                else if (keyboard.IsKeyDown(Keys.Left) && previousKeyboard.IsKeyUp(Keys.Left) && cursorIndex > 0)
                 {
                     cursorIndex--;
+                }
+                else if (keyboard.IsKeyDown(Keys.Right) && previousKeyboard.IsKeyUp(Keys.Right) && cursorIndex < currentWord.Length)
+                {
+                    cursorIndex++;
+                }
+                if(currentWord == "")
+                {
+                    Scale = font.MeasureString(" ");
+                }
+                else
+                {
+                    Scale = font.MeasureString(currentWord);
                 }
             }
         }
@@ -110,7 +125,7 @@ namespace Stringscapes
         public override void Draw(SpriteBatch spriteBatch)
         {
             base.Draw(spriteBatch);
-
+            spriteBatch.DrawString(font, currentWord, Position, Color.Black);
         }                           
     }
 }

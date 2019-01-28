@@ -13,9 +13,11 @@ namespace Stringscapes
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
         MouseState mouse;
+        KeyboardState keyboard;
+        KeyboardState previousKeyboard;
         Stringscape stringscape;
         Sprite reshuffleButton;
-        MouseState previous;
+        MouseState previousMouse;
         Random gen = new Random();
         Texture2D baseCircleTexture;
         Texture2D letterTexture;
@@ -32,6 +34,7 @@ namespace Stringscapes
         Sprite backArrow;
         Sprite topSelectDot;
         Sprite bottomSelectDot;
+        Textbox amountBox;
 
 
         enum ScreenState
@@ -95,12 +98,13 @@ namespace Stringscapes
             timedPixel.SetData(new[] { Color.White });
             timedOptionsButton = new Sprite(timedPixel, new Vector2(GraphicsDevice.Viewport.Width / 2 - (timedPixel.Width * wordListFont.MeasureString("- Timed").X / 2), 750), Color.TransparentBlack, GraphicsDevice) { Scale = wordListFont.MeasureString("- Timed") };
 
-
             backArrow = new Sprite(leftRightArrowTexture, new Vector2(10, 10), Color.Black, GraphicsDevice);
 
             topSelectDot = new Sprite(selectDot, new Vector2(GraphicsDevice.Viewport.Width / 2 - selectDot.Width, 450), Color.White, GraphicsDevice);
             bottomSelectDot = new Sprite(selectDot, new Vector2(GraphicsDevice.Viewport.Width / 2 - selectDot.Width, 550), Color.White, GraphicsDevice);
             
+            amountBox = new Textbox(new Vector2(GraphicsDevice.Viewport.Width/2 + 150, 475),Color.White,wordListFont,GraphicsDevice);
+
             string baseWord = "";
             while (baseWord == "")
             {
@@ -124,6 +128,7 @@ namespace Stringscapes
                 Exit();
 
             mouse = Mouse.GetState();
+            keyboard = Keyboard.GetState();
 
             switch (GameState)
             {
@@ -166,12 +171,13 @@ namespace Stringscapes
                         topSelectDot.Color = Color.White;
                         bottomSelectDot.Color = Color.Black;
                     }
-
+                    amountBox.Update(mouse, keyboard, previousKeyboard);
 
                     if (mouse.LeftButton == ButtonState.Pressed && backArrow.Bounds.Contains(mouse.Position))
                     {
                         topSelectDot.Color = Color.White;
                         bottomSelectDot.Color = Color.White;
+                        amountBox.currentWord = " ";
                         GameState = ScreenState.TitleScreen;
                     }
                     break;
@@ -187,18 +193,19 @@ namespace Stringscapes
                         topSelectDot.Color = Color.White;
                         bottomSelectDot.Color = Color.Black;
                     }
-
+                    amountBox.Update(mouse, keyboard, previousKeyboard);
 
                     if (mouse.LeftButton == ButtonState.Pressed && backArrow.Bounds.Contains(mouse.Position))
                     {
                         topSelectDot.Color = Color.White;
                         bottomSelectDot.Color = Color.White;
+                        amountBox.currentWord = " ";
                         GameState = ScreenState.TitleScreen;
                     }
                     break;
 
                 case ScreenState.Game:
-                    if (Math.Pow(reshuffleButton.Position.X + reshuffleButton.Radius - mouse.Position.X, 2) + Math.Pow(reshuffleButton.Position.Y + reshuffleButton.Radius - mouse.Position.Y, 2) <= Math.Pow(reshuffleButton.Radius, 2) && mouse.LeftButton == ButtonState.Pressed && previous.LeftButton != ButtonState.Pressed)
+                    if (Math.Pow(reshuffleButton.Position.X + reshuffleButton.Radius - mouse.Position.X, 2) + Math.Pow(reshuffleButton.Position.Y + reshuffleButton.Radius - mouse.Position.Y, 2) <= Math.Pow(reshuffleButton.Radius, 2) && mouse.LeftButton == ButtonState.Pressed && previousMouse.LeftButton != ButtonState.Pressed)
                     {
                         stringscape.Reshuffle();
                     }
@@ -227,7 +234,8 @@ namespace Stringscapes
                 case ScreenState.EndOfRoundOptions:
                     break;
             }
-            previous = mouse;
+            previousMouse = mouse;
+            previousKeyboard = keyboard;
             base.Update(gameTime);
         }
 
@@ -253,6 +261,7 @@ namespace Stringscapes
                     bottomSelectDot.Draw(spriteBatch);
                     spriteBatch.DrawString(definitionFont, "words:", new Vector2(bottomSelectDot.Position.X + bottomSelectDot.Image.Width, bottomSelectDot.Position.Y), Color.Black);
                     backArrow.Draw(spriteBatch);
+                    amountBox.Draw(spriteBatch);
                     break;
 
                 case ScreenState.TimedOptions:
@@ -262,6 +271,7 @@ namespace Stringscapes
                     bottomSelectDot.Draw(spriteBatch);
                     spriteBatch.DrawString(definitionFont, "seconds:", new Vector2(bottomSelectDot.Position.X + bottomSelectDot.Image.Width, bottomSelectDot.Position.Y), Color.Black);
                     backArrow.Draw(spriteBatch);
+                    amountBox.Draw(spriteBatch);
                     break;
 
                 case ScreenState.Game:
