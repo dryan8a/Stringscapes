@@ -34,6 +34,7 @@ namespace Stringscapes
         Sprite backArrow;
         Sprite topSelectDot;
         Sprite bottomSelectDot;
+        Sprite enterButton;
         Textbox amountBox;
 
 
@@ -58,8 +59,8 @@ namespace Stringscapes
         protected override void Initialize()
         {
             IsMouseVisible = true;
-            graphics.PreferredBackBufferHeight = 1100;
-            graphics.PreferredBackBufferWidth = 2000;
+            graphics.PreferredBackBufferHeight = 1080;
+            graphics.PreferredBackBufferWidth = 1920;
             graphics.ApplyChanges();
             base.Initialize();
         }
@@ -90,20 +91,20 @@ namespace Stringscapes
             definitionFont = Content.Load<SpriteFont>("definitionFont");
             titleFont = Content.Load<SpriteFont>("titleFont");
 
-            var casualPixel = new Texture2D(GraphicsDevice, 1, 1);
-            casualPixel.SetData(new[] { Color.White });
-            casualOptionsButton = new Sprite(casualPixel, new Vector2(GraphicsDevice.Viewport.Width / 2 - (casualPixel.Width * wordListFont.MeasureString("- Casual").X / 2), 600), Color.TransparentBlack, GraphicsDevice) { Scale = wordListFont.MeasureString("- Casual") };
+            var genericWhitePixel = new Texture2D(GraphicsDevice, 1, 1);
+            genericWhitePixel.SetData(new[] { Color.White });            
+            casualOptionsButton = new Sprite(genericWhitePixel, new Vector2(GraphicsDevice.Viewport.Width / 2 - (genericWhitePixel.Width * wordListFont.MeasureString("- Casual").X / 2), 600), Color.TransparentBlack, GraphicsDevice) { Scale = wordListFont.MeasureString("- Casual") };
 
-            var timedPixel = new Texture2D(GraphicsDevice, 1, 1);
-            timedPixel.SetData(new[] { Color.White });
-            timedOptionsButton = new Sprite(timedPixel, new Vector2(GraphicsDevice.Viewport.Width / 2 - (timedPixel.Width * wordListFont.MeasureString("- Timed").X / 2), 750), Color.TransparentBlack, GraphicsDevice) { Scale = wordListFont.MeasureString("- Timed") };
+            timedOptionsButton = new Sprite(genericWhitePixel, new Vector2(GraphicsDevice.Viewport.Width / 2 - (genericWhitePixel.Width * wordListFont.MeasureString("- Timed").X / 2), 750), Color.TransparentBlack, GraphicsDevice) { Scale = wordListFont.MeasureString("- Timed") };
 
             backArrow = new Sprite(leftRightArrowTexture, new Vector2(10, 10), Color.Black, GraphicsDevice);
 
             topSelectDot = new Sprite(selectDot, new Vector2(GraphicsDevice.Viewport.Width / 2 - selectDot.Width, 450), Color.White, GraphicsDevice);
             bottomSelectDot = new Sprite(selectDot, new Vector2(GraphicsDevice.Viewport.Width / 2 - selectDot.Width, 550), Color.White, GraphicsDevice);
-            
-            amountBox = new Textbox(new Vector2(GraphicsDevice.Viewport.Width/2 + 150, 475),Color.White,wordListFont,GraphicsDevice);
+
+            amountBox = new Textbox(new Vector2(GraphicsDevice.Viewport.Width / 2 + 150, 475), Color.White, wordListFont, GraphicsDevice);
+
+            enterButton = new Sprite(genericWhitePixel, new Vector2(GraphicsDevice.Viewport.Width / 2 - (genericWhitePixel.Width * wordListFont.MeasureString("Enter").X / 2), 650), Color.TransparentBlack, GraphicsDevice) { Scale = wordListFont.MeasureString("Enter") };
 
             string baseWord = "";
             while (baseWord == "")
@@ -114,6 +115,7 @@ namespace Stringscapes
                     baseWord = words[wordIndex];
                 }
             }
+
             stringscape = new Stringscape(baseWord, baseCircleTexture, letterTexture, leftRightArrowTexture, upDownArrowTexture, GraphicsDevice, letterFont, wordListFont, definitionFont);
             reshuffleButton = new Sprite(Content.Load<Texture2D>("cycle"), Vector2.Zero, Color.LightGray, GraphicsDevice)
             {
@@ -123,10 +125,6 @@ namespace Stringscapes
 
         protected override void Update(GameTime gameTime)
         {
-
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
-                Exit();
-
             mouse = Mouse.GetState();
             keyboard = Keyboard.GetState();
 
@@ -138,6 +136,7 @@ namespace Stringscapes
                         casualOptionsButton.Color = Color.OrangeRed;
                         if (mouse.LeftButton == ButtonState.Pressed)
                         {
+                            casualOptionsButton.Color = Color.TransparentBlack;
                             GameState = ScreenState.CasualOptions;
                         }
                     }
@@ -151,6 +150,7 @@ namespace Stringscapes
                         timedOptionsButton.Color = Color.OrangeRed;
                         if (mouse.LeftButton == ButtonState.Pressed)
                         {
+                            timedOptionsButton.Color = Color.TransparentBlack;
                             GameState = ScreenState.TimedOptions;
                         }
                     }
@@ -171,15 +171,21 @@ namespace Stringscapes
                         topSelectDot.Color = Color.White;
                         bottomSelectDot.Color = Color.Black;
                     }
-                    amountBox.Update(mouse, keyboard, previousKeyboard);
-
-                    if (mouse.LeftButton == ButtonState.Pressed && backArrow.Bounds.Contains(mouse.Position))
+                    else if (mouse.LeftButton == ButtonState.Pressed && backArrow.Bounds.Contains(mouse.Position))
                     {
                         topSelectDot.Color = Color.White;
                         bottomSelectDot.Color = Color.White;
-                        amountBox.currentWord = " ";
+                        amountBox.reset();
                         GameState = ScreenState.TitleScreen;
                     }
+                    else if (mouse.LeftButton == ButtonState.Pressed && enterButton.Bounds.Contains(mouse.Position) && (topSelectDot.Color == Color.Black || bottomSelectDot.Color == Color.Black) && amountBox.currentWord != "")
+                    {
+                        topSelectDot.Color = Color.White;
+                        bottomSelectDot.Color = Color.White;
+                        amountBox.reset();
+                        GameState = ScreenState.Game;
+                    }
+                    amountBox.Update(mouse, keyboard, previousKeyboard);
                     break;
 
                 case ScreenState.TimedOptions:
@@ -193,15 +199,21 @@ namespace Stringscapes
                         topSelectDot.Color = Color.White;
                         bottomSelectDot.Color = Color.Black;
                     }
-                    amountBox.Update(mouse, keyboard, previousKeyboard);
-
-                    if (mouse.LeftButton == ButtonState.Pressed && backArrow.Bounds.Contains(mouse.Position))
+                    else if (mouse.LeftButton == ButtonState.Pressed && backArrow.Bounds.Contains(mouse.Position))
                     {
                         topSelectDot.Color = Color.White;
                         bottomSelectDot.Color = Color.White;
-                        amountBox.currentWord = " ";
+                        amountBox.reset();
                         GameState = ScreenState.TitleScreen;
                     }
+                    else if (mouse.LeftButton == ButtonState.Pressed && enterButton.Bounds.Contains(mouse.Position) && (topSelectDot.Color == Color.Black || bottomSelectDot.Color == Color.Black) && amountBox.currentWord != "")
+                    {
+                        topSelectDot.Color = Color.White;
+                        bottomSelectDot.Color = Color.White;
+                        amountBox.reset();
+                        GameState = ScreenState.Game;
+                    }
+                    amountBox.Update(mouse, keyboard, previousKeyboard);
                     break;
 
                 case ScreenState.Game:
@@ -227,7 +239,6 @@ namespace Stringscapes
                             stringscape.CorrectWords.Add(new CorrectWord(stringscape.chosenWord, wordListFont));
                         }
                         stringscape.chosenWord = "";
-
                     }
                     break;
 
@@ -243,12 +254,12 @@ namespace Stringscapes
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
             spriteBatch.Begin();
-
+            
             switch (GameState)
             {
                 case ScreenState.TitleScreen:
                     spriteBatch.DrawString(titleFont, "Stringscapes", new Vector2((GraphicsDevice.Viewport.Width / 2) - (titleFont.MeasureString("Stringscapes").X / 2), 50), Color.Black);
-                    casualOptionsButton.Draw(spriteBatch);
+                    casualOptionsButton.Draw(spriteBatch);                    
                     spriteBatch.DrawString(wordListFont, "- Casual", casualOptionsButton.Position, Color.Black);
                     timedOptionsButton.Draw(spriteBatch);
                     spriteBatch.DrawString(wordListFont, "- Timed", timedOptionsButton.Position, Color.Black);
@@ -262,6 +273,8 @@ namespace Stringscapes
                     spriteBatch.DrawString(definitionFont, "words:", new Vector2(bottomSelectDot.Position.X + bottomSelectDot.Image.Width, bottomSelectDot.Position.Y), Color.Black);
                     backArrow.Draw(spriteBatch);
                     amountBox.Draw(spriteBatch);
+                    enterButton.Draw(spriteBatch);
+                    spriteBatch.DrawString(wordListFont, "Enter", enterButton.Position, Color.Black);
                     break;
 
                 case ScreenState.TimedOptions:
@@ -272,6 +285,8 @@ namespace Stringscapes
                     spriteBatch.DrawString(definitionFont, "seconds:", new Vector2(bottomSelectDot.Position.X + bottomSelectDot.Image.Width, bottomSelectDot.Position.Y), Color.Black);
                     backArrow.Draw(spriteBatch);
                     amountBox.Draw(spriteBatch);
+                    enterButton.Draw(spriteBatch);
+                    spriteBatch.DrawString(wordListFont, "Enter", enterButton.Position, Color.Black);
                     break;
 
                 case ScreenState.Game:

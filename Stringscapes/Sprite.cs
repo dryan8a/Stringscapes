@@ -31,27 +31,27 @@ namespace DylanMonoGameIntro
         {
             get
             {
-                return new Rectangle((int)Position.X, (int)Position.Y, (int)(Image.Width * Scale.X), (int)(Image.Height * Scale.Y));
-            }          
+                return new Rectangle((int)(Position.X - Origin.X), (int)(Position.Y - Origin.Y), (int)(Image.Width * Scale.X), (int)(Image.Height * Scale.Y));
+            }
         }
-//        public Vector2 Midpoint
-//        {
-//           get { return new Vector2(Image.Width * Scale.X / 2 + Position.X, Image.Height * Scale.Y / 2 + Position.Y); }
-//        }
+        //        public Vector2 Midpoint
+        //        {
+        //           get { return new Vector2(Image.Width * Scale.X / 2 + Position.X, Image.Height * Scale.Y / 2 + Position.Y); }
+        //        }
         public float Radius
         {
             get { return Image.Width * Scale.X / 2; }
         }
         public static void CreatePixel(GraphicsDevice graphicsDevice)
         {
-            if(pixel == null)
+            if (pixel == null)
             {
                 pixel = new Texture2D(graphicsDevice, 1, 1);
-                pixel.SetData(new [] { Color.White });
+                pixel.SetData(new[] { Color.White });
             }
         }
 
-        public Sprite(Texture2D Image, Vector2 Position, Color Color,GraphicsDevice device)
+        public Sprite(Texture2D Image, Vector2 Position, Color Color, GraphicsDevice device)
         {
             if (Image == null)
             {
@@ -60,43 +60,43 @@ namespace DylanMonoGameIntro
             }
             this.Image = Image;
             this.Position = Position;
-            this.Color = Color;     
+            this.Color = Color;
         }
 
         public virtual void Draw(SpriteBatch spriteBatch)
         {
             spriteBatch.Draw(Image, Position, null, Color, Rotation, Origin, Scale, SpriteEffects, 0);
 
-            switch(DrawBounds)
+            switch (DrawBounds)
             {
                 case BoundingBoxTypes.Rectangle:
-                    spriteBatch.Draw(pixel, Position - Origin * Scale, null, Color.Red * 0.5f, 0f, Vector2.Zero, new Vector2(Image.Width, Image.Height) * Scale, SpriteEffects, 0f);      
+                    //spriteBatch.Draw(pixel, Position - Origin, null, Color.Red * 0.5f, 0f, Vector2.Zero, new Vector2(Image.Width, Image.Height) * Scale, SpriteEffects, 0f);
+                    spriteBatch.Draw(pixel, Bounds, Color.Red * 0.5f);
                     break;
 
                 case BoundingBoxTypes.Circle:
                     var points = new List<Vector2>();
                     int numberOfPoints = 1080;
-                        float arcLength = (float)(Math.PI * 2f / (double)numberOfPoints);
-                        Vector2[] boundPoints = new Vector2[numberOfPoints+1];
+                    float arcLength = (float)(Math.PI * 2f / (double)numberOfPoints);
+                    Vector2[] boundPoints = new Vector2[numberOfPoints + 1];
                     for (int t = 0; t < 3; t++)
                     {
                         for (int i = 0; i < numberOfPoints + 1; i++)
                         {
-                            float x = (float)Math.Cos(arcLength * i) * (Radius-t);
-                            float y = (float)Math.Sin(arcLength * i) * (Radius-t);
+                            float x = (float)Math.Cos(arcLength * i) * (Radius - t);
+                            float y = (float)Math.Sin(arcLength * i) * (Radius - t);
 
                             x += Position.X;
                             y += Position.Y;
 
                             boundPoints[i] = new Vector2((int)x, (int)y);
                         }
-                    }   
-                    for (int i = 0; i < numberOfPoints+1; i++)
+                    }
+                    for (int i = 0; i < numberOfPoints + 1; i++)
                     {
                         spriteBatch.Draw(pixel, boundPoints[i], null, Color.Red * 0.5f, 0f, Vector2.Zero, 1f, SpriteEffects, 0f);
                     }
-                        boundPoints[numberOfPoints] = boundPoints[0];
-                    
+                    boundPoints[numberOfPoints] = boundPoints[0];
                     break;
             }
         }

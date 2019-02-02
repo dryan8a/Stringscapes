@@ -17,6 +17,13 @@ namespace Stringscapes
         int cursorIndex;
         SpriteFont font;
 
+        public void reset()
+        {
+            currentWord = "";
+            Scale = font.MeasureString(" ");
+            cursorIndex = 0;
+        }
+
         public Textbox(Vector2 Position, Color color, SpriteFont font, GraphicsDevice graphicsDevice) : base(new Texture2D(graphicsDevice, 1, 1), Position, color, graphicsDevice)
         {            
             Texture2D image = new Texture2D(graphicsDevice, 1, 1);
@@ -113,7 +120,7 @@ namespace Stringscapes
                 }
                 if(currentWord == "")
                 {
-                    Scale = font.MeasureString(" ");
+                    reset();
                 }
                 else
                 {
