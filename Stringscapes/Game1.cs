@@ -29,12 +29,15 @@ namespace Stringscapes
         SpriteFont wordListFont;
         SpriteFont titleFont;
         Dictionary<int, string> words = new Dictionary<int, string>();
-        Sprite casualOptionsButton;
-        Sprite timedOptionsButton;
+        TitledButton casualOptionsButton;
+        TitledButton timedOptionsButton;
         Sprite backArrow;
         Sprite topSelectDot;
         Sprite bottomSelectDot;
-        Sprite enterButton;
+        TitledButton enterButton;
+        TitledButton backToMenuButton;
+        TitledButton continueButton;
+        TitledButton optionsButton;
         Textbox amountBox;
         int counterTimer;
         int originalCounterTimer;
@@ -95,11 +98,9 @@ namespace Stringscapes
             definitionFont = Content.Load<SpriteFont>("definitionFont");
             titleFont = Content.Load<SpriteFont>("titleFont");
 
-            var genericWhitePixel = new Texture2D(GraphicsDevice, 1, 1);
-            genericWhitePixel.SetData(new[] { Color.White });            
-            casualOptionsButton = new Sprite(genericWhitePixel, new Vector2(GraphicsDevice.Viewport.Width / 2 - (genericWhitePixel.Width * wordListFont.MeasureString("- Casual").X / 2), 600), Color.TransparentBlack, GraphicsDevice) { Scale = wordListFont.MeasureString("- Casual") };
+            casualOptionsButton = new TitledButton("- Casual", wordListFont, new Vector2(GraphicsDevice.Viewport.Width / 2 - (wordListFont.MeasureString("- Casual").X / 2), 600), Color.TransparentBlack, Color.OrangeRed, GraphicsDevice);
 
-            timedOptionsButton = new Sprite(genericWhitePixel, new Vector2(GraphicsDevice.Viewport.Width / 2 - (genericWhitePixel.Width * wordListFont.MeasureString("- Timed").X / 2), 750), Color.TransparentBlack, GraphicsDevice) { Scale = wordListFont.MeasureString("- Timed") };
+            timedOptionsButton = new TitledButton("- Timed", wordListFont, new Vector2(GraphicsDevice.Viewport.Width / 2 - (wordListFont.MeasureString("- Timed").X / 2), 750), Color.TransparentBlack, Color.OrangeRed, GraphicsDevice);
 
             backArrow = new Sprite(leftRightArrowTexture, new Vector2(10, 10), Color.Black, GraphicsDevice);
 
@@ -108,7 +109,7 @@ namespace Stringscapes
 
             amountBox = new Textbox(new Vector2(GraphicsDevice.Viewport.Width / 2 + 150, 475), Color.White, wordListFont, GraphicsDevice);
 
-            enterButton = new Sprite(genericWhitePixel, new Vector2(GraphicsDevice.Viewport.Width / 2 - (genericWhitePixel.Width * wordListFont.MeasureString("Enter").X / 2), 650), Color.TransparentBlack, GraphicsDevice) { Scale = wordListFont.MeasureString("Enter") };
+            enterButton = new TitledButton("Enter", wordListFont, new Vector2(GraphicsDevice.Viewport.Width / 2 - (wordListFont.MeasureString("Enter").X / 2), 650), Color.TransparentBlack, Color.TransparentBlack, GraphicsDevice);
 
             counterTimer = 0;
             originalCounterTimer = 0;
@@ -117,8 +118,7 @@ namespace Stringscapes
             while (baseWord == "")
             {
                 int wordIndex = gen.Next(0, words.Count);
-                //if (words[wordIndex].Length >= 7 && words[wordIndex].Length <= 8)
-                if(words[wordIndex].Length == 8)
+                if (words[wordIndex].Length == 8)
                 {
                     baseWord = words[wordIndex];
                 }
@@ -132,45 +132,34 @@ namespace Stringscapes
         }
 
         protected override void Update(GameTime gameTime)
-        {         
+        {
             mouse = Mouse.GetState();
             keyboard = Keyboard.GetState();
-            
+
             switch (GameState)
             {
                 case ScreenState.TitleScreen:
-                    if (casualOptionsButton.Bounds.Contains(mouse.Position))
+                    casualOptionsButton.Update(mouse);
+                    if (casualOptionsButton.isClicked)
                     {
-                        casualOptionsButton.Color = Color.OrangeRed;
-                        if (mouse.LeftButton == ButtonState.Pressed)
-                        {
-                            casualOptionsButton.Color = Color.TransparentBlack;
-                            PreviousState = ScreenState.TitleScreen;
-                            GameState = ScreenState.CasualOptions;
-                        }
-                    }
-                    else
-                    {
-                        casualOptionsButton.Color = Color.TransparentBlack;
+                        casualOptionsButton.Color = casualOptionsButton.initialColor;
+                        PreviousState = ScreenState.TitleScreen;
+                        GameState = ScreenState.CasualOptions;
+                        casualOptionsButton.isClicked = false;
                     }
 
-                    if (timedOptionsButton.Bounds.Contains(mouse.Position))
+                    timedOptionsButton.Update(mouse);
+                    if (timedOptionsButton.isClicked)
                     {
-                        timedOptionsButton.Color = Color.OrangeRed;
-                        if (mouse.LeftButton == ButtonState.Pressed)
-                        {
-                            timedOptionsButton.Color = Color.TransparentBlack;
-                            PreviousState = ScreenState.TitleScreen;
-                            GameState = ScreenState.TimedOptions;
-                        }
-                    }
-                    else
-                    {
-                        timedOptionsButton.Color = Color.TransparentBlack;
+                        casualOptionsButton.Color = casualOptionsButton.initialColor;
+                        PreviousState = ScreenState.TitleScreen;
+                        GameState = ScreenState.TimedOptions;
+                        casualOptionsButton.isClicked = false;
                     }
                     break;
 
                 case ScreenState.CasualOptions:
+                    enterButton.Update(mouse);
                     if (mouse.LeftButton == ButtonState.Pressed && topSelectDot.Bounds.Contains(mouse.Position))
                     {
                         topSelectDot.Color = Color.Black;
@@ -189,10 +178,10 @@ namespace Stringscapes
                         PreviousState = ScreenState.CasualOptions;
                         GameState = ScreenState.TitleScreen;
                     }
-                    else if (mouse.LeftButton == ButtonState.Pressed && enterButton.Bounds.Contains(mouse.Position) && (topSelectDot.Color == Color.Black || bottomSelectDot.Color == Color.Black) && amountBox.currentWord != "")
+                    else if (enterButton.isClicked && (topSelectDot.Color == Color.Black || bottomSelectDot.Color == Color.Black) && amountBox.currentWord != "")
                     {
                         counterTimer = int.Parse(amountBox.currentWord);
-                        if(topSelectDot.Color == Color.Black)
+                        if (topSelectDot.Color == Color.Black)
                         {
                             counterTimer *= 18;
                         }
@@ -202,11 +191,13 @@ namespace Stringscapes
                         amountBox.reset();
                         PreviousState = ScreenState.CasualOptions;
                         GameState = ScreenState.Game;
+                        enterButton.isClicked = false;
                     }
                     amountBox.Update(mouse, keyboard, previousKeyboard);
                     break;
 
                 case ScreenState.TimedOptions:
+                    enterButton.Update(mouse);
                     if (mouse.LeftButton == ButtonState.Pressed && topSelectDot.Bounds.Contains(mouse.Position))
                     {
                         topSelectDot.Color = Color.Black;
@@ -225,7 +216,7 @@ namespace Stringscapes
                         PreviousState = ScreenState.TimedOptions;
                         GameState = ScreenState.TitleScreen;
                     }
-                    else if (mouse.LeftButton == ButtonState.Pressed && enterButton.Bounds.Contains(mouse.Position) && (topSelectDot.Color == Color.Black || bottomSelectDot.Color == Color.Black) && amountBox.currentWord != "")
+                    else if (enterButton.isClicked && (topSelectDot.Color == Color.Black || bottomSelectDot.Color == Color.Black) && amountBox.currentWord != "")
                     {
                         counterTimer = int.Parse(amountBox.currentWord);
                         if (topSelectDot.Color == Color.Black)
@@ -239,6 +230,7 @@ namespace Stringscapes
                         amountBox.reset();
                         PreviousState = ScreenState.TimedOptions;
                         GameState = ScreenState.Game;
+                        enterButton.isClicked = false;
                     }
                     amountBox.Update(mouse, keyboard, previousKeyboard);
                     break;
@@ -268,7 +260,7 @@ namespace Stringscapes
                         stringscape.chosenWord = "";
                     }
 
-                    if(PreviousState == ScreenState.CasualOptions)
+                    if (PreviousState == ScreenState.CasualOptions)
                     {
                         if (counterTimer == 0)
                         {
@@ -277,10 +269,10 @@ namespace Stringscapes
                         }
                         counterTimer = originalCounterTimer - stringscape.CorrectWords.Count;
                     }
-                    else if(PreviousState == ScreenState.TimedOptions)
+                    else if (PreviousState == ScreenState.TimedOptions)
                     {
                         elapsedTime += gameTime.ElapsedGameTime;
-                        if(elapsedTime >= targetTime)
+                        if (elapsedTime >= targetTime)
                         {
                             PreviousState = ScreenState.Game;
                             GameState = ScreenState.EndOfRoundOptions;
@@ -290,6 +282,7 @@ namespace Stringscapes
                     break;
 
                 case ScreenState.EndOfRoundOptions:
+
                     break;
             }
             previousMouse = mouse;
@@ -301,15 +294,13 @@ namespace Stringscapes
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
             spriteBatch.Begin();
-            
+
             switch (GameState)
             {
                 case ScreenState.TitleScreen:
                     spriteBatch.DrawString(titleFont, "Stringscapes", new Vector2((GraphicsDevice.Viewport.Width / 2) - (titleFont.MeasureString("Stringscapes").X / 2), 50), Color.Black);
-                    casualOptionsButton.Draw(spriteBatch);                    
-                    spriteBatch.DrawString(wordListFont, "- Casual", casualOptionsButton.Position, Color.Black);
+                    casualOptionsButton.Draw(spriteBatch);
                     timedOptionsButton.Draw(spriteBatch);
-                    spriteBatch.DrawString(wordListFont, "- Timed", timedOptionsButton.Position, Color.Black);
                     break;
 
                 case ScreenState.CasualOptions:
@@ -321,7 +312,6 @@ namespace Stringscapes
                     backArrow.Draw(spriteBatch);
                     amountBox.Draw(spriteBatch);
                     enterButton.Draw(spriteBatch);
-                    spriteBatch.DrawString(wordListFont, "Enter", enterButton.Position, Color.Black);
                     break;
 
                 case ScreenState.TimedOptions:
@@ -333,7 +323,6 @@ namespace Stringscapes
                     backArrow.Draw(spriteBatch);
                     amountBox.Draw(spriteBatch);
                     enterButton.Draw(spriteBatch);
-                    spriteBatch.DrawString(wordListFont, "Enter", enterButton.Position, Color.Black);
                     break;
 
                 case ScreenState.Game:
@@ -343,13 +332,14 @@ namespace Stringscapes
                     {
                         spriteBatch.DrawString(wordListFont, counterTimer.ToString() + " words left", new Vector2(reshuffleButton.Bounds.Width + 40, 0), Color.Black);
                     }
-                    else if(PreviousState == ScreenState.TimedOptions)
+                    else if (PreviousState == ScreenState.TimedOptions)
                     {
                         spriteBatch.DrawString(wordListFont, ((int)(targetTime - elapsedTime).TotalSeconds).ToString() + " seconds left", new Vector2(reshuffleButton.Bounds.Width + 40, 0), Color.Black);
                     }
                     break;
 
                 case ScreenState.EndOfRoundOptions:
+
                     break;
             }
             spriteBatch.End();
