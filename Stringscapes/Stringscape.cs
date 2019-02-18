@@ -163,9 +163,7 @@ namespace Stringscapes
                     animateNextPage = false;
                 }
             }
-        }
-        
-
+        }        
 
         public Stringscape(string word, Texture2D baseCircleTexture, Texture2D letterTexture, Texture2D leftRightArrowTexture, Texture2D upDownArrowTexture, GraphicsDevice GraphicsDevice, SpriteFont letterFont, SpriteFont wordListFont, SpriteFont definitionFont)
         {
@@ -200,8 +198,8 @@ namespace Stringscapes
             {
                 SpriteEffects = SpriteEffects.FlipHorizontally
             };
-            upArrow = new Sprite(upDownArrowTexture, new Vector2(900, 750), Color.Black, GraphicsDevice);
-            downArrow = new Sprite(upDownArrowTexture, new Vector2(900, 750 + upDownArrowTexture.Height + 25), Color.Black, GraphicsDevice)
+            upArrow = new Sprite(upDownArrowTexture, new Vector2(900, 730), Color.Black, GraphicsDevice);
+            downArrow = new Sprite(upDownArrowTexture, new Vector2(900, 730 + upDownArrowTexture.Height + 20), Color.Black, GraphicsDevice)
             {
                 SpriteEffects = SpriteEffects.FlipVertically
             };
@@ -222,10 +220,10 @@ namespace Stringscapes
             }
 
             ShuffleAnimation();
-
+            
             if (!animateNextPage)
             {
-                wordBoxPosition = new Vector2(wordsStartPos - (2 * padding.X + wordPageSize) * wordPage, 50);
+                wordBoxPosition = new Vector2(wordsStartPos - ((padding.X + wordPageSize) * wordPage - 10), 50);
 
                 //if (previousWordBoxPosition != wordBoxPosition && previousWordBoxPosition != Vector2.Zero)
                 //{
@@ -339,12 +337,18 @@ namespace Stringscapes
             {
                 downArrow.Color = Color.DarkSlateGray;
                 upArrow.Color = Color.Black;
-            }
+            }            
             else
             {
                 upArrow.Color = Color.Black;
                 downArrow.Color = Color.Black;
             }
+            if(displayedDefinition != "" && correctWordDefinitions[CorrectWords[definedWordIndex].word].Length == 1)
+            {
+                upArrow.Color = Color.DarkSlateGray;
+                downArrow.Color = Color.DarkSlateGray;
+            }
+
 
             for (int i = 0; i < CorrectWords.Count; i++)
             {

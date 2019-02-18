@@ -36,7 +36,7 @@ namespace Stringscapes
         Sprite bottomSelectDot;
         TitledButton enterButton;
         TitledButton backToMenuButton;
-        TitledButton continueButton;
+        TitledButton playAgainButton;
         TitledButton optionsButton;
         Textbox amountBox;
         int counterTimer;
@@ -54,6 +54,21 @@ namespace Stringscapes
         }
         ScreenState GameState = ScreenState.TitleScreen;
         ScreenState PreviousState = ScreenState.TitleScreen;
+
+        public void stringscapeInitialization()
+        {
+            string baseWord = "";
+            while (baseWord == "")
+            {
+                int wordIndex = gen.Next(0, words.Count);
+                if (words[wordIndex].Length == 8)
+                {
+                    baseWord = words[wordIndex];
+                }
+            }
+
+            stringscape = new Stringscape(baseWord, baseCircleTexture, letterTexture, leftRightArrowTexture, upDownArrowTexture, GraphicsDevice, letterFont, wordListFont, definitionFont);
+        }
 
         public Game1()
         {
@@ -112,19 +127,8 @@ namespace Stringscapes
             enterButton = new TitledButton("Enter", wordListFont, new Vector2(GraphicsDevice.Viewport.Width / 2 - (wordListFont.MeasureString("Enter").X / 2), 650), Color.TransparentBlack, Color.TransparentBlack, GraphicsDevice);
 
             counterTimer = 0;
-            originalCounterTimer = 0;
+            originalCounterTimer = 0;            
 
-            string baseWord = "";
-            while (baseWord == "")
-            {
-                int wordIndex = gen.Next(0, words.Count);
-                if (words[wordIndex].Length == 8)
-                {
-                    baseWord = words[wordIndex];
-                }
-            }
-
-            stringscape = new Stringscape(baseWord, baseCircleTexture, letterTexture, leftRightArrowTexture, upDownArrowTexture, GraphicsDevice, letterFont, wordListFont, definitionFont);
             reshuffleButton = new Sprite(Content.Load<Texture2D>("cycle"), Vector2.Zero, Color.LightGray, GraphicsDevice)
             {
                 Scale = new Vector2(.25f)
@@ -174,7 +178,7 @@ namespace Stringscapes
                     {
                         topSelectDot.Color = Color.White;
                         bottomSelectDot.Color = Color.White;
-                        amountBox.reset();
+                        amountBox.reset();                        
                         PreviousState = ScreenState.CasualOptions;
                         GameState = ScreenState.TitleScreen;
                     }
@@ -189,6 +193,7 @@ namespace Stringscapes
                         topSelectDot.Color = Color.White;
                         bottomSelectDot.Color = Color.White;
                         amountBox.reset();
+                        stringscapeInitialization();
                         PreviousState = ScreenState.CasualOptions;
                         GameState = ScreenState.Game;
                         enterButton.isClicked = false;
@@ -228,6 +233,7 @@ namespace Stringscapes
                         topSelectDot.Color = Color.White;
                         bottomSelectDot.Color = Color.White;
                         amountBox.reset();
+                        stringscapeInitialization();
                         PreviousState = ScreenState.TimedOptions;
                         GameState = ScreenState.Game;
                         enterButton.isClicked = false;
@@ -338,8 +344,7 @@ namespace Stringscapes
                     }
                     break;
 
-                case ScreenState.EndOfRoundOptions:
-
+                case ScreenState.EndOfRoundOptions:                   
                     break;
             }
             spriteBatch.End();
