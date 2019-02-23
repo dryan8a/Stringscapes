@@ -53,6 +53,7 @@
     <Compile Include="Textbox.cs" />
     <Compile Include="TitledButton.cs" />
     <Compile Include="WordDef.cs" />
+    <Compile Include="WordManager.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="MonoGame.Framework">

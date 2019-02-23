@@ -90,13 +90,13 @@ namespace Stringscapes
         protected override void LoadContent()
         {
 
-            using (StreamReader stream = new StreamReader("words.txt"))
+            using (StreamReader stream = new StreamReader("words_alpha.txt"))
             {
                 int index = 0;
                 string word = "";
                 while ((word = stream.ReadLine()) != null)
                 {
-                    words.Add(index, word);
+                    words.Add(index, word.ToUpper());
                     index++;
                 }
             }
@@ -133,6 +133,11 @@ namespace Stringscapes
             {
                 Scale = new Vector2(.25f)
             };
+
+            int buttonsXPos = 200;
+            playAgainButton = new TitledButton("Play Again", wordListFont, new Vector2(buttonsXPos, 400), Color.TransparentBlack, Color.OrangeRed, GraphicsDevice);
+            optionsButton = new TitledButton("Options", wordListFont, new Vector2(buttonsXPos, 800), Color.TransparentBlack, Color.OrangeRed, GraphicsDevice);
+            backToMenuButton = new TitledButton("Back To Menu", wordListFont, new Vector2(buttonsXPos, 1200), Color.TransparentBlack, Color.OrangeRed, GraphicsDevice);
         }
 
         protected override void Update(GameTime gameTime)
@@ -251,9 +256,9 @@ namespace Stringscapes
                     if (stringscape.chosenWord.Length > 2)
                     {
                         bool containsWord = false;
-                        for (int i = 0; i < stringscape.CorrectWords.Count; i++)
+                        for (int i = 0; i < stringscape.wordManager.CorrectWords.Count; i++)
                         {
-                            if (stringscape.CorrectWords[i].word == stringscape.chosenWord)
+                            if (stringscape.wordManager.CorrectWords[i].word == stringscape.chosenWord)
                             {
                                 containsWord = true;
                             }
@@ -261,7 +266,7 @@ namespace Stringscapes
 
                         if (words.ContainsValue(stringscape.chosenWord) && !containsWord)
                         {
-                            stringscape.CorrectWords.Add(new CorrectWord(stringscape.chosenWord, wordListFont));
+                            stringscape.wordManager.CorrectWords.Add(new CorrectWord(stringscape.chosenWord, wordListFont));
                         }
                         stringscape.chosenWord = "";
                     }
@@ -273,7 +278,7 @@ namespace Stringscapes
                             PreviousState = ScreenState.Game;
                             GameState = ScreenState.EndOfRoundOptions;
                         }
-                        counterTimer = originalCounterTimer - stringscape.CorrectWords.Count;
+                        counterTimer = originalCounterTimer - stringscape.wordManager.CorrectWords.Count;
                     }
                     else if (PreviousState == ScreenState.TimedOptions)
                     {
@@ -288,7 +293,10 @@ namespace Stringscapes
                     break;
 
                 case ScreenState.EndOfRoundOptions:
-
+                    stringscape.wordManager.Update(mouse,previousMouse);
+                    playAgainButton.Update(mouse);
+                    optionsButton.Update(mouse);
+                    backToMenuButton.Update(mouse);
                     break;
             }
             previousMouse = mouse;
@@ -344,7 +352,12 @@ namespace Stringscapes
                     }
                     break;
 
-                case ScreenState.EndOfRoundOptions:                   
+                case ScreenState.EndOfRoundOptions:
+                    stringscape.wordManager.Draw(spriteBatch);
+                    stringscape.backdrop.Draw(spriteBatch);
+                    playAgainButton.Draw(spriteBatch);
+                    optionsButton.Draw(spriteBatch);
+                    backToMenuButton.Draw(spriteBatch);
                     break;
             }
             spriteBatch.End();
