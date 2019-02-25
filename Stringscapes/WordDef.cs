@@ -100,5 +100,4 @@ namespace Stringscapes
         public string phoneticNotation { get; set; }
         public string phoneticSpelling { get; set; }
     }
-
 }

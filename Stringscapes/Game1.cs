@@ -38,6 +38,7 @@ namespace Stringscapes
         TitledButton backToMenuButton;
         TitledButton playAgainButton;
         TitledButton optionsButton;
+        TitledButton continueButton;
         Textbox amountBox;
         int counterTimer;
         int originalCounterTimer;
@@ -53,9 +54,9 @@ namespace Stringscapes
             EndOfRoundOptions
         }
         ScreenState GameState = ScreenState.TitleScreen;
-        ScreenState PreviousState = ScreenState.TitleScreen;
+        ScreenState OptionsState = ScreenState.TitleScreen;
 
-        public void stringscapeInitialization()
+        public void StringscapeInitialization(string stringscapeBaseWord = null)
         {
             string baseWord = "";
             while (baseWord == "")
@@ -65,6 +66,11 @@ namespace Stringscapes
                 {
                     baseWord = words[wordIndex];
                 }
+            }
+            
+            if(stringscapeBaseWord != null)
+            {
+                baseWord = stringscapeBaseWord;
             }
 
             stringscape = new Stringscape(baseWord, baseCircleTexture, letterTexture, leftRightArrowTexture, upDownArrowTexture, GraphicsDevice, letterFont, wordListFont, definitionFont);
@@ -135,9 +141,11 @@ namespace Stringscapes
             };
 
             int buttonsXPos = 200;
-            playAgainButton = new TitledButton("Play Again", wordListFont, new Vector2(buttonsXPos, 400), Color.TransparentBlack, Color.OrangeRed, GraphicsDevice);
-            optionsButton = new TitledButton("Options", wordListFont, new Vector2(buttonsXPos, 800), Color.TransparentBlack, Color.OrangeRed, GraphicsDevice);
-            backToMenuButton = new TitledButton("Back To Menu", wordListFont, new Vector2(buttonsXPos, 1200), Color.TransparentBlack, Color.OrangeRed, GraphicsDevice);
+            playAgainButton = new TitledButton("Play Again", wordListFont, new Vector2(buttonsXPos, 200), Color.TransparentBlack, Color.OrangeRed, GraphicsDevice);
+            continueButton = new TitledButton("Continue", wordListFont, new Vector2(buttonsXPos, 400), Color.TransparentBlack, Color.OrangeRed, GraphicsDevice);
+            optionsButton = new TitledButton("Options", wordListFont, new Vector2(buttonsXPos, 600), Color.TransparentBlack, Color.OrangeRed, GraphicsDevice);
+            backToMenuButton = new TitledButton("Back To Menu", wordListFont, new Vector2(buttonsXPos, 800), Color.TransparentBlack, Color.OrangeRed, GraphicsDevice);
+            
         }
 
         protected override void Update(GameTime gameTime)
@@ -152,7 +160,6 @@ namespace Stringscapes
                     if (casualOptionsButton.isClicked)
                     {
                         casualOptionsButton.Color = casualOptionsButton.initialColor;
-                        PreviousState = ScreenState.TitleScreen;
                         GameState = ScreenState.CasualOptions;
                         casualOptionsButton.isClicked = false;
                     }
@@ -161,7 +168,6 @@ namespace Stringscapes
                     if (timedOptionsButton.isClicked)
                     {
                         casualOptionsButton.Color = casualOptionsButton.initialColor;
-                        PreviousState = ScreenState.TitleScreen;
                         GameState = ScreenState.TimedOptions;
                         casualOptionsButton.isClicked = false;
                     }
@@ -179,15 +185,14 @@ namespace Stringscapes
                         topSelectDot.Color = Color.White;
                         bottomSelectDot.Color = Color.Black;
                     }
-                    else if (mouse.LeftButton == ButtonState.Pressed && backArrow.Bounds.Contains(mouse.Position))
+                    else if (OptionsState != ScreenState.EndOfRoundOptions && mouse.LeftButton == ButtonState.Pressed && backArrow.Bounds.Contains(mouse.Position))
                     {
                         topSelectDot.Color = Color.White;
                         bottomSelectDot.Color = Color.White;
                         amountBox.reset();                        
-                        PreviousState = ScreenState.CasualOptions;
                         GameState = ScreenState.TitleScreen;
                     }
-                    else if (enterButton.isClicked && (topSelectDot.Color == Color.Black || bottomSelectDot.Color == Color.Black) && amountBox.currentWord != "")
+                    if (enterButton.isClicked && (topSelectDot.Color == Color.Black || bottomSelectDot.Color == Color.Black) && amountBox.currentWord != "")
                     {
                         counterTimer = int.Parse(amountBox.currentWord);
                         if (topSelectDot.Color == Color.Black)
@@ -198,8 +203,11 @@ namespace Stringscapes
                         topSelectDot.Color = Color.White;
                         bottomSelectDot.Color = Color.White;
                         amountBox.reset();
-                        stringscapeInitialization();
-                        PreviousState = ScreenState.CasualOptions;
+                        if (OptionsState != ScreenState.EndOfRoundOptions)
+                        {
+                            StringscapeInitialization();
+                        }
+                        OptionsState = ScreenState.CasualOptions;
                         GameState = ScreenState.Game;
                         enterButton.isClicked = false;
                     }
@@ -207,7 +215,7 @@ namespace Stringscapes
                     break;
 
                 case ScreenState.TimedOptions:
-                    enterButton.Update(mouse);
+                    enterButton.Update(mouse);                   
                     if (mouse.LeftButton == ButtonState.Pressed && topSelectDot.Bounds.Contains(mouse.Position))
                     {
                         topSelectDot.Color = Color.Black;
@@ -218,15 +226,14 @@ namespace Stringscapes
                         topSelectDot.Color = Color.White;
                         bottomSelectDot.Color = Color.Black;
                     }
-                    else if (mouse.LeftButton == ButtonState.Pressed && backArrow.Bounds.Contains(mouse.Position))
+                    else if (OptionsState != ScreenState.EndOfRoundOptions && mouse.LeftButton == ButtonState.Pressed && backArrow.Bounds.Contains(mouse.Position))
                     {
                         topSelectDot.Color = Color.White;
                         bottomSelectDot.Color = Color.White;
                         amountBox.reset();
-                        PreviousState = ScreenState.TimedOptions;
                         GameState = ScreenState.TitleScreen;
                     }
-                    else if (enterButton.isClicked && (topSelectDot.Color == Color.Black || bottomSelectDot.Color == Color.Black) && amountBox.currentWord != "")
+                    if (enterButton.isClicked && (topSelectDot.Color == Color.Black || bottomSelectDot.Color == Color.Black) && amountBox.currentWord != "")
                     {
                         counterTimer = int.Parse(amountBox.currentWord);
                         if (topSelectDot.Color == Color.Black)
@@ -238,8 +245,11 @@ namespace Stringscapes
                         topSelectDot.Color = Color.White;
                         bottomSelectDot.Color = Color.White;
                         amountBox.reset();
-                        stringscapeInitialization();
-                        PreviousState = ScreenState.TimedOptions;
+                        if (OptionsState != ScreenState.EndOfRoundOptions)
+                        {
+                            StringscapeInitialization();
+                        }
+                        OptionsState = ScreenState.TimedOptions;
                         GameState = ScreenState.Game;
                         enterButton.isClicked = false;
                     }
@@ -267,25 +277,23 @@ namespace Stringscapes
                         if (words.ContainsValue(stringscape.chosenWord) && !containsWord)
                         {
                             stringscape.wordManager.CorrectWords.Add(new CorrectWord(stringscape.chosenWord, wordListFont));
+                            counterTimer--;
                         }
                         stringscape.chosenWord = "";
                     }
 
-                    if (PreviousState == ScreenState.CasualOptions)
+                    if (OptionsState == ScreenState.CasualOptions)
                     {
                         if (counterTimer == 0)
                         {
-                            PreviousState = ScreenState.Game;
                             GameState = ScreenState.EndOfRoundOptions;
                         }
-                        counterTimer = originalCounterTimer - stringscape.wordManager.CorrectWords.Count;
                     }
-                    else if (PreviousState == ScreenState.TimedOptions)
+                    else if (OptionsState == ScreenState.TimedOptions)
                     {
                         elapsedTime += gameTime.ElapsedGameTime;
                         if (elapsedTime >= targetTime)
                         {
-                            PreviousState = ScreenState.Game;
                             GameState = ScreenState.EndOfRoundOptions;
                         }
                     }
@@ -295,8 +303,28 @@ namespace Stringscapes
                 case ScreenState.EndOfRoundOptions:
                     stringscape.wordManager.Update(mouse,previousMouse);
                     playAgainButton.Update(mouse);
+                    continueButton.Update(mouse);
                     optionsButton.Update(mouse);
                     backToMenuButton.Update(mouse);
+                    if(playAgainButton.isClicked)
+                    {
+                        StringscapeInitialization();
+                        GameState = ScreenState.Game;
+                    }
+                    else if(continueButton.isClicked)
+                    {
+                        GameState = OptionsState;                        
+                        OptionsState = ScreenState.EndOfRoundOptions;
+                    }
+                    else if(optionsButton.isClicked)
+                    {
+                        GameState = OptionsState;
+                    }
+                    else if(backToMenuButton.isClicked)
+                    {
+                        OptionsState = ScreenState.TitleScreen;
+                        GameState = ScreenState.TitleScreen;
+                    }
                     break;
             }
             previousMouse = mouse;
@@ -323,7 +351,10 @@ namespace Stringscapes
                     spriteBatch.DrawString(definitionFont, "pages:", new Vector2(topSelectDot.Position.X + topSelectDot.Image.Width, topSelectDot.Position.Y), Color.Black);
                     bottomSelectDot.Draw(spriteBatch);
                     spriteBatch.DrawString(definitionFont, "words:", new Vector2(bottomSelectDot.Position.X + bottomSelectDot.Image.Width, bottomSelectDot.Position.Y), Color.Black);
-                    backArrow.Draw(spriteBatch);
+                    if (OptionsState != ScreenState.EndOfRoundOptions)
+                    {
+                        backArrow.Draw(spriteBatch);
+                    }
                     amountBox.Draw(spriteBatch);
                     enterButton.Draw(spriteBatch);
                     break;
@@ -334,7 +365,10 @@ namespace Stringscapes
                     spriteBatch.DrawString(definitionFont, "minutes:", new Vector2(topSelectDot.Position.X + topSelectDot.Image.Width, topSelectDot.Position.Y), Color.Black);
                     bottomSelectDot.Draw(spriteBatch);
                     spriteBatch.DrawString(definitionFont, "seconds:", new Vector2(bottomSelectDot.Position.X + bottomSelectDot.Image.Width, bottomSelectDot.Position.Y), Color.Black);
-                    backArrow.Draw(spriteBatch);
+                    if (OptionsState != ScreenState.EndOfRoundOptions)
+                    {
+                        backArrow.Draw(spriteBatch);
+                    }
                     amountBox.Draw(spriteBatch);
                     enterButton.Draw(spriteBatch);
                     break;
@@ -342,11 +376,11 @@ namespace Stringscapes
                 case ScreenState.Game:
                     stringscape.Draw(spriteBatch);
                     reshuffleButton.Draw(spriteBatch);
-                    if (PreviousState == ScreenState.CasualOptions)
+                    if (OptionsState == ScreenState.CasualOptions)
                     {
                         spriteBatch.DrawString(wordListFont, counterTimer.ToString() + " words left", new Vector2(reshuffleButton.Bounds.Width + 40, 0), Color.Black);
                     }
-                    else if (PreviousState == ScreenState.TimedOptions)
+                    else if (OptionsState == ScreenState.TimedOptions)
                     {
                         spriteBatch.DrawString(wordListFont, ((int)(targetTime - elapsedTime).TotalSeconds).ToString() + " seconds left", new Vector2(reshuffleButton.Bounds.Width + 40, 0), Color.Black);
                     }
@@ -356,6 +390,7 @@ namespace Stringscapes
                     stringscape.wordManager.Draw(spriteBatch);
                     stringscape.backdrop.Draw(spriteBatch);
                     playAgainButton.Draw(spriteBatch);
+                    continueButton.Draw(spriteBatch);
                     optionsButton.Draw(spriteBatch);
                     backToMenuButton.Draw(spriteBatch);
                     break;
